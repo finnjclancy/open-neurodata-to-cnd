@@ -1556,7 +1556,6 @@ name = "open-neurodata-to-cnd"
 version = "0.1.0.dev0"
 source = { editable = "." }
 dependencies = [
-    { name = "cnd-mne-converter" },
     { name = "mne" },
     { name = "numpy", version = "2.2.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
     { name = "numpy", version = "2.4.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version == '3.11.*'" },
@@ -1564,7 +1563,11 @@ dependencies = [
 ]
 
 [package.optional-dependencies]
+conversion = [
+    { name = "cnd-mne-converter" },
+]
 dev = [
+    { name = "cnd-mne-converter" },
     { name = "edfio" },
     { name = "jsonschema" },
     { name = "mypy" },
@@ -1573,21 +1576,36 @@ dev = [
     { name = "pytest-cov" },
     { name = "ruff" },
 ]
+test = [
+    { name = "edfio" },
+    { name = "jsonschema" },
+    { name = "mypy" },
+    { name = "pybv" },
+    { name = "pytest" },
+    { name = "ruff" },
+]
 
 [package.metadata]
 requires-dist = [
-    { name = "cnd-mne-converter", git = "https://github.com/finnjclancy/cnd-mne-converter.git?rev=1b48b432aa127a46d5962e7b652ab4b04deb3754" },
+    { name = "cnd-mne-converter", marker = "extra == 'conversion'", git = "https://github.com/finnjclancy/cnd-mne-converter.git?rev=1b48b432aa127a46d5962e7b652ab4b04deb3754" },
+    { name = "cnd-mne-converter", marker = "extra == 'dev'", git = "https://github.com/finnjclancy/cnd-mne-converter.git?rev=1b48b432aa127a46d5962e7b652ab4b04deb3754" },
     { name = "edfio", marker = "extra == 'dev'", specifier = ">=0.4" },
+    { name = "edfio", marker = "extra == 'test'", specifier = ">=0.4" },
     { name = "jsonschema", marker = "extra == 'dev'", specifier = ">=4.23" },
+    { name = "jsonschema", marker = "extra == 'test'", specifier = ">=4.23" },
     { name = "mne", specifier = ">=1.8" },
     { name = "mypy", marker = "extra == 'dev'", specifier = ">=1.18,<2" },
+    { name = "mypy", marker = "extra == 'test'", specifier = ">=1.18,<2" },
     { name = "numpy", specifier = ">=1.26" },
     { name = "pybv", marker = "extra == 'dev'", specifier = ">=0.7" },
+    { name = "pybv", marker = "extra == 'test'", specifier = ">=0.7" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=8" },
+    { name = "pytest", marker = "extra == 'test'", specifier = ">=8" },
     { name = "pytest-cov", marker = "extra == 'dev'", specifier = ">=5" },
     { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.9" },
+    { name = "ruff", marker = "extra == 'test'", specifier = ">=0.9" },
 ]
-provides-extras = ["dev"]
+provides-extras = ["conversion", "dev", "test"]
 
 [[package]]
 name = "packaging"

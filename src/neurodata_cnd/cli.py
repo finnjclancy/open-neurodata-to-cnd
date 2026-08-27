@@ -8,8 +8,6 @@ from collections.abc import Sequence
 from dataclasses import asdict
 from pathlib import Path
 
-from .pipeline import convert_recipe
-
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="neurodata-to-cnd")
@@ -26,6 +24,15 @@ def build_parser() -> argparse.ArgumentParser:
 def main(argv: Sequence[str] | None = None) -> int:
     arguments = build_parser().parse_args(argv)
     if arguments.command == "convert":
+        try:
+            from .pipeline import convert_recipe
+        except ModuleNotFoundError as error:
+            if error.name == "cnd_mne":
+                raise SystemExit(
+                    "Conversion requires the companion CND-MNE package. "
+                    "Install this project with its 'conversion' extra."
+                ) from error
+            raise
         result = convert_recipe(
             arguments.recipe,
             cache_root=arguments.cache_root,

@@ -16,11 +16,15 @@ jobs:
         with:
           python-version: "3.12"
       - name: Install package and test dependencies
-        run: python -m pip install -e '.[dev]'
+        run: python -m pip install -e '.[test]'
       - name: Validate catalogue, recipes, schemas, and example manifests
         run: python scripts/validate_catalog.py
-      - name: Run offline converter tests
-        run: pytest -m 'not integration'
+      - name: Run public-dependency tests
+        run: >-
+          pytest
+          tests/test_features.py
+          tests/test_metadata.py
+          tests/test_readers.py
       - name: Run static checks
         run: |
           ruff check .

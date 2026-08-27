@@ -45,6 +45,13 @@ uv run neurodata-to-cnd convert recipes/eegmmidb-s001-r03.json \
   --output-root outputs
 ```
 
+The full conversion extra currently resolves CND-MNE from its pinned companion
+repository. Public CI therefore runs the metadata, feature, EDF, BrainVision,
+and FIF tests without that private dependency; the complete pipeline and public
+data integration test run locally. Making CND-MNE publicly installable is the
+remaining packaging decision before third parties can execute conversions from
+a clean public environment.
+
 The offline suite also exercises EDF, BrainVision, and FIF readers plus MATLAB
 v5 and v7.3 CND outputs. See the
 [validated vertical-slice report](docs/VERTICAL-SLICE-EEGMMIDB.md) for exact
