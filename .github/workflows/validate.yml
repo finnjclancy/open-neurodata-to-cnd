@@ -18,4 +18,4 @@ jobs:
       - name: Validate catalogue, recipes, schemas, and example manifests
         run: python scripts/validate_catalog.py
       - name: Check whitespace errors
-        run: git show --check --oneline --pretty=format: HEAD
+        run: "git show --check --oneline --pretty=format: HEAD"
