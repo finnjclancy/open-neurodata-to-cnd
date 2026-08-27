@@ -1,0 +1,39 @@
+{
+  "manifest_version": "1.0.0",
+  "release_id": "ds006434/cnd-v0.1.0-example",
+  "status": "example-only",
+  "source": {
+    "dataset_id": "ds006434",
+    "provider": "OpenNeuro",
+    "version": "PIN_BEFORE_USE",
+    "doi": null,
+    "snapshot_sha256": null
+  },
+  "conversion": {
+    "recipe_id": "ds006434-cnd",
+    "recipe_version": "0.1.0-draft",
+    "repository_commit": "REPLACE_AT_RUNTIME",
+    "cnd_mne_commit": "REPLACE_AT_RUNTIME",
+    "environment_digest": "REPLACE_AT_RUNTIME"
+  },
+  "contents": {
+    "modality": "eeg",
+    "subjects": 0,
+    "trials": 0,
+    "features": [],
+    "duration_seconds": 0,
+    "files": []
+  },
+  "validation": {
+    "strict_cnd": "not_run",
+    "cnd_to_mne": "not_run",
+    "source_reconciliation": "not_run",
+    "warnings": []
+  },
+  "licenses": {
+    "neural_data": "REPLACE_AT_RUNTIME",
+    "stimulus_assets": "REPLACE_AT_RUNTIME",
+    "derived_release": "REPLACE_AT_RUNTIME"
+  },
+  "published_at": null
+}

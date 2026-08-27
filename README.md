@@ -1,6 +1,6 @@
-# Public EEG and MEG Corpora for CND Conversion
+# Open Neurodata to CND
 
-A researched directory of public, structured EEG, MEG, and selected iEEG datasets that could be converted into the Continuous-event Neural Data (CND) format and subsequently loaded into MNE.
+A catalogue and reproducible workflow for converting public, structured EEG, MEG, and selected iEEG datasets into the Continuous-event Neural Data (CND) format.
 
 **Last reviewed:** 28 August 2026
 
@@ -29,6 +29,39 @@ BIDS / structured source
     -> CND dataStim.mat + dataSub*.mat
     -> CND schema and CND-to-MNE round-trip validation
 ```
+
+## Project structure
+
+The Git repository stores metadata and reproducible instructions—not terabytes of neural recordings.
+
+```text
+open-neurodata-to-cnd/
+├── catalog/                 # Machine-readable dataset registry and schema
+├── recipes/                 # Dataset-specific conversion decisions
+├── converters/              # Reusable source and stimulus-feature adapters
+├── workflows/               # Local, HPC, and batch orchestration entry points
+├── manifests/               # Example and generated provenance manifests
+├── schemas/                 # Machine-readable recipe and manifest contracts
+├── storage/                 # Object layout and publication rules
+├── scripts/                 # Catalogue and repository validation tools
+├── tests/                   # Unit, integration, and small-fixture tests
+├── docs/                    # Architecture and operating documentation
+└── .github/workflows/       # Continuous validation; never bulk data processing
+```
+
+See [Architecture](docs/ARCHITECTURE.md), [Storage design](storage/README.md), and [Recipe format](recipes/README.md).
+
+### Separation of responsibilities
+
+| Layer | Stored in Git | Stored outside Git |
+|---|---|---|
+| Discovery | Dataset IDs, URLs, versions, licenses, scale estimates | Nothing |
+| Source acquisition | Download instructions and checksums | BIDS/EDF/BrainVision/CTF source files |
+| Conversion | Recipes, adapters, feature definitions, software environment | Temporary working files |
+| Validation | Tests, schemas, expected summaries | Large validation artifacts and logs |
+| Publication | Immutable manifests, indexes, checksums | Versioned CND datasets and optional derived features |
+
+The recommended storage backend is an S3-compatible object store or DataLad/git-annex. GitHub Releases may be used for small fixtures, manifests, and documentation, but not for multi-gigabyte corpora.
 
 ## Repository-scale discovery sources
 
@@ -310,6 +343,6 @@ In particular, [Lalor Natural Speech / OpenNeuro `ds004408`](https://openneuro.o
 
 ## Status
 
-This repository currently contains research and conversion planning only. It does **not** host or redistribute any neural or stimulus data.
+This repository currently contains the researched corpus directory, the first machine-readable registry, an example conversion recipe, provenance/storage conventions, and catalogue validation. It does **not** host or redistribute neural or stimulus data.
 
 Dataset catalogues change frequently. Re-query the live source and verify the version, license, access status, included stimuli, and total storage requirement before downloading at scale.

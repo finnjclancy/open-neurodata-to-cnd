@@ -1,0 +1,34 @@
+# Neural data and generated corpora never belong in Git.
+data/
+sources/
+work/
+outputs/
+releases/
+cache/
+
+# Common neurophysiology and scientific-data formats.
+*.bdf
+*.edf
+*.eeg
+*.fif
+*.gdf
+*.mat
+*.mff
+*.set
+*.vhdr
+*.vmrk
+*.npy
+*.npz
+*.h5
+*.hdf5
+
+# Archives and local state.
+*.zip
+*.tar
+*.tar.gz
+*.7z
+.env
+.venv/
+__pycache__/
+*.pyc
+.DS_Store

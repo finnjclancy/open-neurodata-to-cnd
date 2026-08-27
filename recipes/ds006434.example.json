@@ -1,0 +1,74 @@
+{
+  "$schema": "../schemas/recipe.schema.json",
+  "recipe_id": "ds006434-cnd",
+  "recipe_version": "0.1.0-draft",
+  "status": "draft",
+  "source": {
+    "dataset_id": "ds006434",
+    "provider": "OpenNeuro",
+    "url": "https://openneuro.org/datasets/ds006434",
+    "version": null,
+    "require_pinned_version_before_conversion": true
+  },
+  "selection": {
+    "modality": "eeg",
+    "task": ["exp1Diotic"],
+    "subjects": ["diotic01"],
+    "representation": "cortical",
+    "sampling_rate_hz": 1000
+  },
+  "trials": {
+    "unit": "source_trial",
+    "boundary_source": "events.tsv",
+    "expected_duration_seconds": 64,
+    "preserve_variable_lengths": true
+  },
+  "features": [
+    {
+      "name": "attended_envelope",
+      "kind": "continuous",
+      "source": "provided stimulus audio and attention metadata",
+      "unit": "normalized_amplitude"
+    },
+    {
+      "name": "unattended_envelope",
+      "kind": "continuous",
+      "source": "provided stimulus audio and attention metadata",
+      "unit": "normalized_amplitude"
+    },
+    {
+      "name": "trial_onset",
+      "kind": "impulse",
+      "source": "events.tsv",
+      "unit": "binary"
+    }
+  ],
+  "synchronization": {
+    "event_source": "events.tsv",
+    "earphone_delay": "use corrected source triggers",
+    "target_sampling_rate_hz": 1000,
+    "manual_review_required": true
+  },
+  "output": {
+    "format": "CND 1.0",
+    "mat_version": "7.3",
+    "strict_validation": true,
+    "one_neural_file_per_subject": true,
+    "shared_stimulus_file": true
+  },
+  "validation": {
+    "require_source_reconciliation": true,
+    "require_cnd_mne_load": true,
+    "require_round_trip_sample": true,
+    "fail_on_warning": true
+  },
+  "license": {
+    "neural_data": "verify from pinned source snapshot",
+    "stimulus_assets": "verify audiobook redistribution and derivative-feature rights",
+    "publish_stimulus_media": false
+  },
+  "notes": [
+    "This is an architectural example, not an approved scientific recipe.",
+    "Confirm exact task labels, subject identifiers, source version, units, and audio-feature method before conversion."
+  ]
+}
