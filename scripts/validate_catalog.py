@@ -8,16 +8,13 @@ import sys
 from pathlib import Path
 from urllib.parse import urlparse
 
-
 ROOT = Path(__file__).resolve().parents[1]
 CATALOG = ROOT / "catalog" / "datasets.json"
-JSON_FILES = [
-    CATALOG,
-    ROOT / "recipes" / "ds006434.example.json",
-    ROOT / "manifests" / "example.manifest.json",
-    ROOT / "schemas" / "dataset.schema.json",
-    ROOT / "schemas" / "recipe.schema.json",
-]
+JSON_FILES = sorted(
+    path
+    for directory in ("catalog", "recipes", "manifests", "schemas")
+    for path in (ROOT / directory).glob("*.json")
+)
 
 
 def fail(message: str) -> None:
@@ -96,7 +93,9 @@ def main() -> int:
     if priorities != expected:
         fail(f"priorities must be contiguous 1..{len(datasets)}")
 
-    print(f"Validated {len(datasets)} catalogue entries and {len(JSON_FILES)} JSON files.")
+    print(
+        f"Validated {len(datasets)} catalogue entries and {len(JSON_FILES)} JSON files."
+    )
     return 0
 
 

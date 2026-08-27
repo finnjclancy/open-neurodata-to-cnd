@@ -30,6 +30,26 @@ BIDS / structured source
     -> CND schema and CND-to-MNE round-trip validation
 ```
 
+## Working vertical slice
+
+The repository now contains an executable, checksum-pinned conversion of
+PhysioNet EEG Motor Movement/Imagery subject 1, run 3. It converts a real
+64-channel EDF+ recording and its embedded annotations into a strict CND 1.0
+neural/stimulus pair, then performs numerical CND-to-MNE reconciliation before
+publishing an immutable local manifest.
+
+```bash
+uv sync --extra dev
+uv run neurodata-to-cnd convert recipes/eegmmidb-s001-r03.json \
+  --cache-root cache \
+  --output-root outputs
+```
+
+The offline suite also exercises EDF, BrainVision, and FIF readers plus MATLAB
+v5 and v7.3 CND outputs. See the
+[validated vertical-slice report](docs/VERTICAL-SLICE-EEGMMIDB.md) for exact
+event counts, checksums, transformations, limitations, and reproduction steps.
+
 ## Project structure
 
 The Git repository stores metadata and reproducible instructions—not terabytes of neural recordings.
@@ -49,7 +69,8 @@ open-neurodata-to-cnd/
 └── .github/workflows/       # Continuous validation; never bulk data processing
 ```
 
-See [Architecture](docs/ARCHITECTURE.md), [Storage design](storage/README.md), and [Recipe format](recipes/README.md).
+See [Architecture](docs/ARCHITECTURE.md), [Storage design](storage/README.md),
+and [Recipe format](recipes/README.md).
 
 ### Separation of responsibilities
 

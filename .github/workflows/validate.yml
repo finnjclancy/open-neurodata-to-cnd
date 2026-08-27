@@ -15,7 +15,16 @@ jobs:
       - uses: actions/setup-python@v7
         with:
           python-version: "3.12"
+      - name: Install package and test dependencies
+        run: python -m pip install -e '.[dev]'
       - name: Validate catalogue, recipes, schemas, and example manifests
         run: python scripts/validate_catalog.py
+      - name: Run offline converter tests
+        run: pytest -m 'not integration'
+      - name: Run static checks
+        run: |
+          ruff check .
+          ruff format --check .
+          mypy src
       - name: Check whitespace errors
         run: "git show --check --oneline --pretty=format: HEAD"

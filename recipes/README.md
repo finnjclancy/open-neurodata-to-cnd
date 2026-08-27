@@ -19,4 +19,9 @@ Recipes declare scientific and technical decisions; they are not merely configur
 - validation requirements;
 - licensing restrictions.
 
-See [`ds006434.example.json`](ds006434.example.json) for the first proposed reference recipe.
+[`eegmmidb-s001-r03.json`](eegmmidb-s001-r03.json) is the first executable
+recipe. It converts one pinned PhysioNet EDF+ recording without preprocessing,
+maps its run-specific annotations to CND impulse features, and requires strict
+CND and numerical round-trip validation. See
+[`ds006434.example.json`](ds006434.example.json) for the proposed natural-speech
+recipe that will follow it.

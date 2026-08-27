@@ -1,0 +1,87 @@
+{
+  "$schema": "../schemas/recipe.schema.json",
+  "recipe_id": "eegmmidb-s001-r03-cnd-events",
+  "recipe_version": "0.1.0",
+  "status": "active",
+  "source": {
+    "dataset_id": "eegmmidb",
+    "provider": "PhysioNet",
+    "url": "https://physionet.org/content/eegmmidb/1.0.0/",
+    "version": "1.0.0",
+    "doi": "10.13026/C28G6P",
+    "file_url": "https://physionet.org/files/eegmmidb/1.0.0/S001/S001R03.edf",
+    "filename": "S001R03.edf",
+    "sha256": "3427c8d01bff1380bc9ab9f27a35ece2af5dfadf3e291bbc05eb66e4dadbfe2e",
+    "require_pinned_version_before_conversion": true
+  },
+  "selection": {
+    "modality": "eeg",
+    "subject": "001",
+    "run": "03",
+    "reader": "edf",
+    "standardize": "eegbci",
+    "montage": "standard_1005",
+    "device_name": "BCI2000 64-channel EEG"
+  },
+  "trials": {
+    "unit": "recording_run",
+    "condition_name": "executed_left_right_fist",
+    "preserve_full_run": true
+  },
+  "features": [
+    {
+      "name": "rest_onset",
+      "kind": "annotation_impulse",
+      "source_annotation": "T0",
+      "unit": "binary",
+      "description": "One-sample impulses at the start of rest periods."
+    },
+    {
+      "name": "left_fist_execution_onset",
+      "kind": "annotation_impulse",
+      "source_annotation": "T1",
+      "unit": "binary",
+      "description": "One-sample impulses at left-fist execution cues in run 3."
+    },
+    {
+      "name": "right_fist_execution_onset",
+      "kind": "annotation_impulse",
+      "source_annotation": "T2",
+      "unit": "binary",
+      "description": "One-sample impulses at right-fist execution cues in run 3."
+    }
+  ],
+  "synchronization": {
+    "event_source": "EDF+ annotation channel",
+    "event_sample_policy": "nearest_sample_using_mne_events_from_annotations",
+    "target_sampling_rate_hz": 160,
+    "resampling": false
+  },
+  "output": {
+    "format": "CND 1.0",
+    "mat_version": "5",
+    "neural_unit": "V",
+    "strict_validation": true,
+    "one_neural_file_per_subject": true,
+    "shared_stimulus_file": true
+  },
+  "validation": {
+    "require_source_checksum": true,
+    "require_source_reconciliation": true,
+    "require_cnd_mne_load": true,
+    "require_round_trip_sample": true,
+    "max_event_quantization_error_samples": 0.5
+  },
+  "license": {
+    "neural_data": "Open Data Commons Attribution License v1.0",
+    "stimulus_assets": "No separate stimulus media are embedded",
+    "derived_release": "Review attribution text before public release"
+  },
+  "notes": [
+    "This vertical slice converts subject 1, run 3 only; it is not the complete dataset.",
+    "T1 and T2 meanings are run-dependent. In run 3 they mean executed left and right fist movements.",
+    "The full continuous run is retained as one CND trial; events become synchronized impulse features.",
+    "No filtering, rereferencing, resampling, artifact rejection, padding, or epoching is performed."
+  ]
+}
+

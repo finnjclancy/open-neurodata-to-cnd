@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/finnjclancy/open-neurodata-to-cnd/schemas/manifest.schema.json",
+  "title": "Open Neurodata to CND release manifest",
+  "type": "object",
+  "required": [
+    "manifest_version",
+    "release_id",
+    "status",
+    "source",
+    "conversion",
+    "contents",
+    "validation",
+    "licenses"
+  ],
+  "properties": {
+    "manifest_version": {"type": "string", "minLength": 1},
+    "release_id": {"type": "string", "minLength": 1},
+    "status": {"type": "string", "minLength": 1},
+    "source": {
+      "type": "object",
+      "required": ["dataset_id", "provider", "version"],
+      "additionalProperties": true
+    },
+    "conversion": {
+      "type": "object",
+      "required": ["recipe_id", "recipe_version"],
+      "additionalProperties": true
+    },
+    "contents": {
+      "type": "object",
+      "required": ["modality", "subjects", "trials", "features", "files"],
+      "properties": {
+        "subjects": {"type": "integer", "minimum": 0},
+        "trials": {"type": "integer", "minimum": 0},
+        "features": {"type": "array", "items": {"type": "string"}},
+        "files": {"type": "array"}
+      },
+      "additionalProperties": true
+    },
+    "validation": {"type": "object"},
+    "licenses": {"type": "object"},
+    "published_at": {"type": ["string", "null"]}
+  },
+  "additionalProperties": false
+}
