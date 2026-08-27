@@ -108,4 +108,3 @@ RUN_PUBLIC_DATA_TESTS=1 uv run pytest tests/test_public_integration.py -vv
 The next important format is not another synthetic file. It should be one small
 OpenNeuro BIDS/BrainVision recording using `events.tsv`, followed by a
 naturalistic audio dataset with continuous rather than impulse features.
-
