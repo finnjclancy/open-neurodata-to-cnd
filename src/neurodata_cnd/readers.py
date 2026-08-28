@@ -12,14 +12,46 @@ class UnsupportedSignalFormatError(ValueError):
     """No reviewed signal adapter exists for the requested input."""
 
 
-def read_raw(path: str | Path, selection: dict[str, Any]) -> mne.io.BaseRaw:
+def read_raw(
+    path: str | Path,
+    selection: dict[str, Any],
+    *,
+    source_root: str | Path | None = None,
+) -> mne.io.BaseRaw:
     """Read EDF/BDF, BrainVision, FIF, EEGLAB, or GDF without preprocessing."""
     source = Path(path)
     reader = str(selection.get("reader", "auto")).lower()
     if reader == "auto":
         reader = _reader_from_suffix(source)
 
-    if reader == "edf":
+    if reader == "bids":
+        if source_root is None:
+            raise ValueError("The BIDS reader requires a source snapshot root")
+        from mne_bids import BIDSPath, read_raw_bids
+
+        extension = selection.get("extension")
+        bids_path = BIDSPath(
+            root=Path(source_root),
+            subject=str(selection["subject"]),
+            session=_optional_entity(selection, "session"),
+            task=str(selection["task"]),
+            acquisition=_optional_entity(selection, "acquisition"),
+            run=_optional_entity(selection, "run"),
+            datatype="eeg",
+            suffix="eeg",
+            extension=str(extension) if extension else None,
+        )
+        if bids_path.fpath.resolve() != source.resolve():
+            raise ValueError(
+                "The BIDS entities resolve to a recording other than "
+                "source.primary_path"
+            )
+        raw = read_raw_bids(
+            bids_path,
+            extra_params={"preload": False},
+            verbose="ERROR",
+        )
+    elif reader == "edf":
         raw = mne.io.read_raw_edf(source, preload=False, verbose="ERROR")
     elif reader == "bdf":
         raw = mne.io.read_raw_bdf(source, preload=False, verbose="ERROR")
@@ -42,9 +74,22 @@ def read_raw(path: str | Path, selection: dict[str, Any]) -> mne.io.BaseRaw:
 
     if not raw.ch_names:
         raise ValueError("Source recording has no signal channels")
+    channel_type_policy = selection.get("channel_type_policy")
+    if channel_type_policy == "all_eeg":
+        evidence = str(selection.get("channel_type_evidence", "")).strip()
+        if not evidence:
+            raise ValueError("all_eeg channel typing requires recorded evidence")
+        raw.set_channel_types({name: "eeg" for name in raw.ch_names}, verbose="ERROR")
+    elif channel_type_policy not in {None, "source"}:
+        raise ValueError(f"Unsupported channel type policy {channel_type_policy!r}")
     if any(channel_type != "eeg" for channel_type in raw.get_channel_types()):
         raise ValueError("The EEG converter requires every selected channel to be EEG")
     return raw
+
+
+def _optional_entity(selection: dict[str, Any], key: str) -> str | None:
+    value = selection.get(key)
+    return str(value) if value is not None else None
 
 
 def _reader_from_suffix(path: Path) -> str:

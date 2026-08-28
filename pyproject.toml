@@ -12,6 +12,7 @@ license = "BSD-3-Clause"
 authors = [{ name = "Finn Clancy" }]
 dependencies = [
   "mne>=1.8",
+  "mne-bids>=0.17,<0.20",
   "numpy>=1.26",
 ]
 

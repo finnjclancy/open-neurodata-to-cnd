@@ -42,3 +42,23 @@ def test_fif_signal_format_loads(tmp_path: Path) -> None:
     assert loaded.n_times == raw.n_times
     assert loaded.ch_names == raw.ch_names
     assert tuple(loaded.annotations.description) == ("A", "B", "A")
+
+
+def test_explicit_eeg_channel_correction_requires_evidence(tmp_path: Path) -> None:
+    raw = synthetic_raw()
+    raw.set_channel_types({name: "misc" for name in raw.ch_names})
+    source = tmp_path / "misc_raw.fif"
+    raw.save(source, overwrite=True, verbose="ERROR")
+
+    with pytest.raises(ValueError, match="requires recorded evidence"):
+        read_raw(source, {"reader": "fif", "channel_type_policy": "all_eeg"})
+
+    loaded = read_raw(
+        source,
+        {
+            "reader": "fif",
+            "channel_type_policy": "all_eeg",
+            "channel_type_evidence": "Reviewed source sidecar declares EEG channels.",
+        },
+    )
+    assert loaded.get_channel_types() == ["eeg", "eeg"]

@@ -30,17 +30,27 @@ BIDS / structured source
     -> CND schema and CND-to-MNE round-trip validation
 ```
 
-## Working vertical slice
+## Working vertical slices
 
-The repository now contains an executable, checksum-pinned conversion of
-PhysioNet EEG Motor Movement/Imagery subject 1, run 3. It converts a real
-64-channel EDF+ recording and its embedded annotations into a strict CND 1.0
-neural/stimulus pair, then performs numerical CND-to-MNE reconciliation before
-publishing an immutable local manifest.
+The repository contains two executable, checksum-pinned conversions that cover
+materially different public-data structures:
+
+- PhysioNet EEG Motor Movement/Imagery subject 1, run 3: one EDF+ file with
+  embedded annotations, 64 channels, 20,000 samples, and 30 events.
+- OpenNeuro `ds004574` subject 001 Oddball: a nine-file BIDS snapshot with an
+  EEGLAB `.set`/`.fdt` pair and `events.tsv`, 63 channels, 408,100 samples, and
+  708 events.
+
+Both produce a strict CND 1.0 neural/stimulus pair, perform numerical CND-to-MNE
+reconciliation, and publish only after a transactional local build succeeds.
 
 ```bash
 uv sync --extra dev
 uv run neurodata-to-cnd convert recipes/eegmmidb-s001-r03.json \
+  --cache-root cache \
+  --output-root outputs
+
+uv run neurodata-to-cnd convert recipes/ds004574-sub001-oddball.json \
   --cache-root cache \
   --output-root outputs
 ```
@@ -53,9 +63,10 @@ remaining packaging decision before third parties can execute conversions from
 a clean public environment.
 
 The offline suite also exercises EDF, BrainVision, and FIF readers plus MATLAB
-v5 and v7.3 CND outputs. See the
-[validated vertical-slice report](docs/VERTICAL-SLICE-EEGMMIDB.md) for exact
-event counts, checksums, transformations, limitations, and reproduction steps.
+v5 and v7.3 CND outputs. See the validated reports for
+[EEGMMIDB](docs/VERTICAL-SLICE-EEGMMIDB.md) and
+[OpenNeuro ds004574](docs/VERTICAL-SLICE-DS004574.md) for exact checksums,
+transformations, event counts, limitations, and reproduction steps.
 
 ## Project structure
 

@@ -23,7 +23,7 @@ from cnd_mne import (
     write_cnd,
 )
 
-from .features import annotation_impulses
+from .features import annotation_impulses, bids_event_impulses
 from .readers import read_raw
 from .recipe import ConversionRecipe, load_recipe
 from .source import SourceSnapshot, acquire_source, sha256_file
@@ -58,8 +58,8 @@ def convert_recipe(
     snapshot = acquire_source(
         resolved_recipe.source, cache_root, source_override=source_override
     )
-    raw = read_raw(snapshot.path, resolved_recipe.selection)
-    extracted = annotation_impulses(raw, resolved_recipe.features)
+    raw = read_raw(snapshot.path, resolved_recipe.selection, source_root=snapshot.root)
+    extracted = _extract_features(raw, resolved_recipe, snapshot)
     expected_sfreq = resolved_recipe.synchronization.get("target_sampling_rate_hz")
     if expected_sfreq is not None and not np.isclose(
         float(expected_sfreq), float(raw.info["sfreq"]), rtol=0, atol=1e-12
@@ -183,6 +183,23 @@ def _device_name(raw: mne.io.BaseRaw, recipe: ConversionRecipe) -> str:
     return str(raw.info.get("device_info") or raw.info.get("description") or "unknown")
 
 
+def _extract_features(
+    raw: mne.io.BaseRaw, recipe: ConversionRecipe, snapshot: SourceSnapshot
+) -> Any:
+    kinds = {feature.kind for feature in recipe.features}
+    if kinds == {"annotation_impulse"}:
+        return annotation_impulses(raw, recipe.features)
+    if kinds == {"bids_event_impulse"}:
+        relative_path = recipe.selection.get("events_path")
+        if not relative_path:
+            raise ValueError("BIDS event features require selection.events_path")
+        events_path = snapshot.root / str(relative_path)
+        if not events_path.is_file():
+            raise FileNotFoundError(events_path)
+        return bids_event_impulses(raw, events_path, recipe.features)
+    raise ValueError("A recipe must use one supported feature-adapter kind")
+
+
 def _manifest(
     recipe: ConversionRecipe,
     snapshot: SourceSnapshot,
@@ -215,10 +232,15 @@ def _manifest(
             "version": recipe.source.version,
             "doi": recipe.source.doi,
             "url": recipe.source.url,
-            "file_url": recipe.source.file_url,
-            "filename": recipe.source.filename,
             "size_bytes": snapshot.size_bytes,
-            "sha256": snapshot.sha256,
+            "sha256": next(
+                item["sha256"]
+                for item in snapshot.files
+                if item["path"] == recipe.source.primary_path
+            ),
+            "snapshot_sha256": snapshot.sha256,
+            "primary_path": recipe.source.primary_path,
+            "files": list(snapshot.files),
         },
         "conversion": {
             "recipe_id": recipe.recipe_id,
@@ -227,9 +249,24 @@ def _manifest(
                 "open-neurodata-to-cnd": version("open-neurodata-to-cnd"),
                 "cnd-mne-converter": version("cnd-mne-converter"),
                 "mne": mne.__version__,
+                "mne-bids": version("mne-bids"),
                 "python": platform.python_version(),
             },
             "reader": recipe.selection.get("reader", "auto"),
+            "channel_type_policy": recipe.selection.get(
+                "channel_type_policy", "source"
+            ),
+            "channel_type_evidence": recipe.selection.get("channel_type_evidence"),
+            "feature_mappings": [
+                {
+                    "name": feature.name,
+                    "kind": feature.kind,
+                    "source_annotation": feature.source_annotation,
+                    "source_column": feature.source_column,
+                    "source_value": feature.source_value,
+                }
+                for feature in recipe.features
+            ],
             "trial_policy": recipe.trials["unit"],
             "neural_unit": recipe.output.get("neural_unit", "V"),
         },

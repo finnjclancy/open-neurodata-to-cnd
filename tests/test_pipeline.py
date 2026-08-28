@@ -45,6 +45,8 @@ def test_complete_local_conversion_and_round_trip(
     assert manifest["contents"]["features"] == ["a_onset", "b_onset"]
     assert len(manifest["contents"]["files"]) == 2
     assert len(manifest["contents"]["canonical_content_sha256"]) == 64
+    assert len(manifest["source"]["sha256"]) == 64
+    assert len(manifest["source"]["snapshot_sha256"]) == 64
 
 
 def test_output_is_immutable_by_default(tmp_path: Path) -> None:

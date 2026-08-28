@@ -1,0 +1,136 @@
+{
+  "$schema": "../schemas/recipe.schema.json",
+  "recipe_id": "ds004574-sub001-oddball-cnd-events",
+  "recipe_version": "0.1.0",
+  "status": "active",
+  "source": {
+    "dataset_id": "ds004574",
+    "provider": "OpenNeuro",
+    "url": "https://openneuro.org/datasets/ds004574/versions/1.0.0",
+    "version": "1.0.0",
+    "doi": "10.18112/openneuro.ds004574.v1.0.0",
+    "primary_path": "sub-001/eeg/sub-001_task-Oddball_eeg.set",
+    "files": [
+      {
+        "path": "dataset_description.json",
+        "url": "https://raw.githubusercontent.com/OpenNeuroDatasets/ds004574/b7c69a16695968de78a3d1f1277654cc85884261/dataset_description.json",
+        "sha256": "4f23e5aec9f22adf4163d6c06ac81b3873d4bbc7bf82a4572712a3a98c2fa176"
+      },
+      {
+        "path": "task-Oddball_events.json",
+        "url": "https://raw.githubusercontent.com/OpenNeuroDatasets/ds004574/b7c69a16695968de78a3d1f1277654cc85884261/task-Oddball_events.json",
+        "sha256": "6148c198da76f39f44d591d4fdef742b21fa064f317cbf10a9dd092092a52bcb"
+      },
+      {
+        "path": "sub-001/eeg/sub-001_task-Oddball_eeg.set",
+        "url": "https://s3.amazonaws.com/openneuro.org/ds004574/sub-001/eeg/sub-001_task-Oddball_eeg.set",
+        "sha256": "3470f3aa63daa6e485726a02eb531100577df27d36d38744140a9d0e2ea4fb1c"
+      },
+      {
+        "path": "sub-001/eeg/sub-001_task-Oddball_eeg.fdt",
+        "url": "https://s3.amazonaws.com/openneuro.org/ds004574/sub-001/eeg/sub-001_task-Oddball_eeg.fdt",
+        "sha256": "56a9f0fecd65c32f817f95395c66c4092c0ba185a383a48462e79e1cce34ddfe"
+      },
+      {
+        "path": "sub-001/eeg/sub-001_task-Oddball_channels.tsv",
+        "url": "https://raw.githubusercontent.com/OpenNeuroDatasets/ds004574/b7c69a16695968de78a3d1f1277654cc85884261/sub-001/eeg/sub-001_task-Oddball_channels.tsv",
+        "sha256": "7483c59062d6288b84176e1654455a039b6c6515e283f1fb2541d51616845a85"
+      },
+      {
+        "path": "sub-001/eeg/sub-001_task-Oddball_coordsystem.json",
+        "url": "https://raw.githubusercontent.com/OpenNeuroDatasets/ds004574/b7c69a16695968de78a3d1f1277654cc85884261/sub-001/eeg/sub-001_task-Oddball_coordsystem.json",
+        "sha256": "38cbd743cd80f8243716dcfe326138c49c124855551fbed50f935724a5ee71d3"
+      },
+      {
+        "path": "sub-001/eeg/sub-001_task-Oddball_eeg.json",
+        "url": "https://raw.githubusercontent.com/OpenNeuroDatasets/ds004574/b7c69a16695968de78a3d1f1277654cc85884261/sub-001/eeg/sub-001_task-Oddball_eeg.json",
+        "sha256": "29cae9a82d1041870ac67634c43bce240423aae4ec2d17a3093d96782d0f7782"
+      },
+      {
+        "path": "sub-001/eeg/sub-001_task-Oddball_electrodes.tsv",
+        "url": "https://raw.githubusercontent.com/OpenNeuroDatasets/ds004574/b7c69a16695968de78a3d1f1277654cc85884261/sub-001/eeg/sub-001_task-Oddball_electrodes.tsv",
+        "sha256": "1211ceb3e32c99fc2c631357b379c5b61c8a46e9cd90495950cb72f532bc7aba"
+      },
+      {
+        "path": "sub-001/eeg/sub-001_task-Oddball_events.tsv",
+        "url": "https://raw.githubusercontent.com/OpenNeuroDatasets/ds004574/b7c69a16695968de78a3d1f1277654cc85884261/sub-001/eeg/sub-001_task-Oddball_events.tsv",
+        "sha256": "a3ad1d6694bd7a742e7666b68f2b6435ae98826d8035f8f68601014f665e5970"
+      }
+    ],
+    "require_pinned_version_before_conversion": true
+  },
+  "selection": {
+    "modality": "eeg",
+    "subject": "001",
+    "task": "Oddball",
+    "reader": "bids",
+    "extension": ".set",
+    "events_path": "sub-001/eeg/sub-001_task-Oddball_events.tsv",
+    "channel_type_policy": "all_eeg",
+    "channel_type_evidence": "The BIDS EEG sidecar declares EEGChannelCount=63 and all 63 named channels have electrode coordinates; channels.tsv incorrectly records type as n/a.",
+    "device_name": "Brain Products 63-channel cross-modal oddball EEG"
+  },
+  "trials": {
+    "unit": "recording_run",
+    "condition_name": "cross_modal_oddball",
+    "preserve_full_run": true
+  },
+  "features": [
+    {
+      "name": "precue_onset",
+      "kind": "bids_event_impulse",
+      "source_column": "value",
+      "source_value": "S  1",
+      "unit": "binary",
+      "description": "Simultaneous visual and auditory precue onset."
+    },
+    {
+      "name": "go_arrow_onset",
+      "kind": "bids_event_impulse",
+      "source_column": "value",
+      "source_value": "S  2",
+      "unit": "binary",
+      "description": "Directional GO arrow onset."
+    },
+    {
+      "name": "response_onset",
+      "kind": "bids_event_impulse",
+      "source_column": "value",
+      "source_value": "S  3",
+      "unit": "binary",
+      "description": "Participant response marker."
+    }
+  ],
+  "synchronization": {
+    "event_source": "BIDS events.tsv sample and onset columns",
+    "event_sample_policy": "prefer_explicit_sample_and_reconcile_with_onset",
+    "target_sampling_rate_hz": 500,
+    "resampling": false
+  },
+  "output": {
+    "format": "CND 1.0",
+    "mat_version": "5",
+    "neural_unit": "V",
+    "strict_validation": true,
+    "one_neural_file_per_subject": true,
+    "shared_stimulus_file": true
+  },
+  "validation": {
+    "require_source_checksum": true,
+    "require_source_reconciliation": true,
+    "require_cnd_mne_load": true,
+    "require_round_trip_sample": true,
+    "max_event_quantization_error_samples": 0.5
+  },
+  "license": {
+    "neural_data": "CC0",
+    "stimulus_assets": "No stimulus media are embedded",
+    "derived_release": "CC0; retain dataset citation and provenance"
+  },
+  "notes": [
+    "This vertical slice converts subject 001 only; it is not the complete 146-participant dataset.",
+    "The complete continuous recording is one CND trial.",
+    "Event meanings are pinned to the dataset-level BIDS sidecar and explicit TSV values.",
+    "No filtering, rereferencing, resampling, artifact rejection, padding, or epoching is performed."
+  ]
+}

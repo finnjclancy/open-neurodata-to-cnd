@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+import csv
 from dataclasses import dataclass
+from pathlib import Path
 
 import mne
 import numpy as np
@@ -34,6 +36,8 @@ def annotation_impulses(
     counts: dict[str, int] = {}
     event_samples_by_label: dict[str, NDArray[np.int64]] = {}
     for specification in specifications:
+        if specification.source_annotation is None:
+            raise ValueError("Annotation feature is missing source_annotation")
         try:
             code = event_ids[specification.source_annotation]
         except KeyError as error:
@@ -61,6 +65,68 @@ def annotation_impulses(
         event_counts=counts,
         max_quantization_error_seconds=max_error,
     )
+
+
+def bids_event_impulses(
+    raw: mne.io.BaseRaw,
+    events_path: str | Path,
+    specifications: tuple[FeatureSpec, ...],
+) -> ExtractedFeatures:
+    """Map reviewed BIDS event-table values to source-clock impulse vectors."""
+    with Path(events_path).open(encoding="utf-8", newline="") as handle:
+        rows = list(csv.DictReader(handle, delimiter="\t"))
+    if not rows or "onset" not in rows[0]:
+        raise ValueError(f"BIDS event table is empty or lacks onset: {events_path}")
+
+    arrays: list[NDArray[np.float64]] = []
+    counts: dict[str, int] = {}
+    quantization_errors: list[float] = []
+    sfreq = float(raw.info["sfreq"])
+    for specification in specifications:
+        column = specification.source_column
+        value = specification.source_value
+        if column is None or value is None:
+            raise ValueError("BIDS event feature lacks source_column/source_value")
+        if column not in rows[0]:
+            raise ValueError(f"BIDS event table lacks reviewed column {column!r}")
+        matching = [row for row in rows if row.get(column) == value]
+        if not matching:
+            raise MissingAnnotationError(
+                f"No BIDS events match {column}={value!r} for {specification.name!r}"
+            )
+        impulse = np.zeros(raw.n_times, dtype=np.float64)
+        for row in matching:
+            onset = float(row["onset"])
+            onset_sample = int(round(onset * sfreq))
+            source_sample = _optional_sample(row.get("sample"))
+            sample = onset_sample if source_sample is None else source_sample
+            if sample < 0 or sample >= raw.n_times:
+                raise ValueError(
+                    f"BIDS event {column}={value!r} maps outside the signal"
+                )
+            if impulse[sample] != 0:
+                raise ValueError(
+                    f"Multiple {column}={value!r} events occupy sample {sample}"
+                )
+            quantization_errors.append(abs(sample / sfreq - onset))
+            impulse[sample] = 1.0
+        arrays.append(impulse)
+        counts[specification.name] = len(matching)
+    return ExtractedFeatures(
+        names=tuple(specification.name for specification in specifications),
+        arrays=tuple(arrays),
+        event_counts=counts,
+        max_quantization_error_seconds=max(quantization_errors, default=0.0),
+    )
+
+
+def _optional_sample(value: str | None) -> int | None:
+    if value is None or value.strip().lower() in {"", "n/a"}:
+        return None
+    numeric = float(value)
+    if not numeric.is_integer():
+        raise ValueError(f"BIDS sample value must be an integer, found {value!r}")
+    return int(numeric)
 
 
 def _maximum_quantization_error(

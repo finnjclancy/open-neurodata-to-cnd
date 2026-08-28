@@ -1261,6 +1261,43 @@ wheels = [
 ]
 
 [[package]]
+name = "mne-bids"
+version = "0.17.0"
+source = { registry = "https://pypi.org/simple" }
+resolution-markers = [
+    "python_full_version < '3.11'",
+]
+dependencies = [
+    { name = "mne", marker = "python_full_version < '3.11'" },
+    { name = "numpy", version = "2.2.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
+    { name = "scipy", version = "1.15.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/1f/01/3df88bc8f03e9cb4b1b93158ba78b26bdb8f1c95d3b82b303a0b00ce301f/mne_bids-0.17.0.tar.gz", hash = "sha256:e6415bce905d6721eb175f8eab269309cb4b75081f43c782da860a89553ab4bb", size = 131187, upload-time = "2025-09-10T18:12:35.127Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/38/22/7cf47282be737084194f3e56112dd5eff0d60476c4db8ff1cac3a2d88142/mne_bids-0.17.0-py3-none-any.whl", hash = "sha256:2cd001b689c1f1f17dec92eb770ef6428e6777082fa3963873c7e36a611fce82", size = 168874, upload-time = "2025-09-10T18:12:33.446Z" },
+]
+
+[[package]]
+name = "mne-bids"
+version = "0.19.0"
+source = { registry = "https://pypi.org/simple" }
+resolution-markers = [
+    "python_full_version >= '3.15'",
+    "python_full_version >= '3.12' and python_full_version < '3.15'",
+    "python_full_version == '3.11.*'",
+]
+dependencies = [
+    { name = "mne", marker = "python_full_version >= '3.11'" },
+    { name = "numpy", version = "2.4.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version == '3.11.*'" },
+    { name = "numpy", version = "2.5.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12'" },
+    { name = "scipy", version = "1.16.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/e9/42/6ddd792c209070c67125a6fd2fb82024cfb4e9eeda507cd59f3cfb4e6a44/mne_bids-0.19.0.tar.gz", hash = "sha256:4166c3ad5afa81f4943d675cdc7e0b90efea6fb470373e667eb93579e18f2409", size = 151834, upload-time = "2026-05-26T18:15:41.493Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/3f/1d/e2c940f8bd8ef0cb2d32d039bd2537ff96d31c17acb643b6f1480a73da8a/mne_bids-0.19.0-py3-none-any.whl", hash = "sha256:2ee6631115fef654e1d0f6c0fb52b99a4f808418c51b36c000ac46933b6e31d3", size = 189809, upload-time = "2026-05-26T18:15:39.835Z" },
+]
+
+[[package]]
 name = "mypy"
 version = "1.20.2"
 source = { registry = "https://pypi.org/simple" }
@@ -1557,6 +1594,8 @@ version = "0.1.0.dev0"
 source = { editable = "." }
 dependencies = [
     { name = "mne" },
+    { name = "mne-bids", version = "0.17.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
+    { name = "mne-bids", version = "0.19.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
     { name = "numpy", version = "2.2.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
     { name = "numpy", version = "2.4.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version == '3.11.*'" },
     { name = "numpy", version = "2.5.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12'" },
@@ -1594,6 +1633,7 @@ requires-dist = [
     { name = "jsonschema", marker = "extra == 'dev'", specifier = ">=4.23" },
     { name = "jsonschema", marker = "extra == 'test'", specifier = ">=4.23" },
     { name = "mne", specifier = ">=1.8" },
+    { name = "mne-bids", specifier = ">=0.17,<0.20" },
     { name = "mypy", marker = "extra == 'dev'", specifier = ">=1.18,<2" },
     { name = "mypy", marker = "extra == 'test'", specifier = ">=1.18,<2" },
     { name = "numpy", specifier = ">=1.26" },

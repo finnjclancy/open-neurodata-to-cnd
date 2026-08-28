@@ -19,9 +19,11 @@ Recipes declare scientific and technical decisions; they are not merely configur
 - validation requirements;
 - licensing restrictions.
 
-[`eegmmidb-s001-r03.json`](eegmmidb-s001-r03.json) is the first executable
-recipe. It converts one pinned PhysioNet EDF+ recording without preprocessing,
-maps its run-specific annotations to CND impulse features, and requires strict
-CND and numerical round-trip validation. See
+[`eegmmidb-s001-r03.json`](eegmmidb-s001-r03.json) converts one pinned PhysioNet
+EDF+ recording and embedded annotations. The structurally different
+[`ds004574-sub001-oddball.json`](ds004574-sub001-oddball.json) converts a pinned
+multi-file BIDS/EEGLAB snapshot and maps explicit `events.tsv` values. Both
+avoid neural preprocessing and require strict CND plus numerical round-trip
+validation. See
 [`ds006434.example.json`](ds006434.example.json) for the proposed natural-speech
 recipe that will follow it.

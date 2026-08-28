@@ -14,14 +14,20 @@ class RecipeError(ValueError):
 
 
 @dataclass(slots=True, frozen=True)
+class SourceFileSpec:
+    path: str
+    url: str
+    sha256: str
+
+
+@dataclass(slots=True, frozen=True)
 class SourceSpec:
     dataset_id: str
     provider: str
     url: str
     version: str
-    file_url: str
-    filename: str
-    sha256: str
+    files: tuple[SourceFileSpec, ...]
+    primary_path: str
     doi: str | None = None
 
 
@@ -29,8 +35,10 @@ class SourceSpec:
 class FeatureSpec:
     name: str
     kind: str
-    source_annotation: str
     unit: str
+    source_annotation: str | None = None
+    source_column: str | None = None
+    source_value: str | None = None
     description: str | None = None
 
 
@@ -63,12 +71,12 @@ def load_recipe(path: str | Path) -> ConversionRecipe:
     version = _text(source_payload, "version")
     if source_payload.get("require_pinned_version_before_conversion") and not version:
         raise RecipeError("source.version must be pinned before conversion")
-    file_url = _url(source_payload, "file_url")
-    sha256 = _text(source_payload, "sha256").lower()
-    if len(sha256) != 64 or any(
-        character not in "0123456789abcdef" for character in sha256
-    ):
-        raise RecipeError("source.sha256 must be a 64-character hexadecimal digest")
+    source_files = _source_files(source_payload)
+    primary_path = str(
+        source_payload.get("primary_path") or source_files[0].path
+    ).strip()
+    if primary_path not in {source_file.path for source_file in source_files}:
+        raise RecipeError("source.primary_path must identify one declared source file")
 
     feature_specs: list[FeatureSpec] = []
     raw_features = payload.get("features")
@@ -78,26 +86,49 @@ def load_recipe(path: str | Path) -> ConversionRecipe:
         if not isinstance(feature, dict):
             raise RecipeError(f"features[{index}] must be an object")
         kind = _text(feature, "kind")
-        if kind != "annotation_impulse":
+        if kind not in {"annotation_impulse", "bids_event_impulse"}:
             raise RecipeError(
                 f"features[{index}].kind={kind!r} is not implemented; "
-                "supported: annotation_impulse"
+                "supported: annotation_impulse, bids_event_impulse"
+            )
+        source_annotation = _optional_text(feature, "source_annotation")
+        source_column = _optional_text(feature, "source_column")
+        source_value = _optional_text(feature, "source_value")
+        if kind == "annotation_impulse" and source_annotation is None:
+            raise RecipeError(
+                f"features[{index}] annotation impulses require source_annotation"
+            )
+        if kind == "bids_event_impulse" and (
+            source_column is None or source_value is None
+        ):
+            raise RecipeError(
+                f"features[{index}] BIDS impulses require source_column/source_value"
             )
         feature_specs.append(
             FeatureSpec(
                 name=_text(feature, "name"),
                 kind=kind,
-                source_annotation=_text(feature, "source_annotation"),
                 unit=_text(feature, "unit"),
+                source_annotation=source_annotation,
+                source_column=source_column,
+                source_value=source_value,
                 description=_optional_text(feature, "description"),
             )
         )
     names = [feature.name for feature in feature_specs]
-    annotations = [feature.source_annotation for feature in feature_specs]
     if len(set(names)) != len(names):
         raise RecipeError("Feature names must be unique")
-    if len(set(annotations)) != len(annotations):
-        raise RecipeError("Source annotations must map to only one feature")
+    selectors = [
+        (
+            feature.kind,
+            feature.source_annotation,
+            feature.source_column,
+            feature.source_value,
+        )
+        for feature in feature_specs
+    ]
+    if len(set(selectors)) != len(selectors):
+        raise RecipeError("Source event selectors must map to only one feature")
 
     selection = _mapping(payload, "selection")
     if _text(selection, "modality").lower() != "eeg":
@@ -124,9 +155,8 @@ def load_recipe(path: str | Path) -> ConversionRecipe:
             provider=_text(source_payload, "provider"),
             url=_url(source_payload, "url"),
             version=version,
-            file_url=file_url,
-            filename=_text(source_payload, "filename"),
-            sha256=sha256,
+            files=source_files,
+            primary_path=primary_path,
             doi=_optional_text(source_payload, "doi"),
         ),
         selection=selection,
@@ -169,3 +199,45 @@ def _url(parent: dict[str, Any], key: str) -> str:
     if parsed.scheme not in {"http", "https"} or not parsed.netloc:
         raise RecipeError(f"{key} must be an HTTP(S) URL")
     return value
+
+
+def _source_files(source: dict[str, Any]) -> tuple[SourceFileSpec, ...]:
+    raw_files = source.get("files")
+    if raw_files is None:
+        raw_files = [
+            {
+                "path": _text(source, "filename"),
+                "url": _url(source, "file_url"),
+                "sha256": _text(source, "sha256"),
+            }
+        ]
+    if not isinstance(raw_files, list) or not raw_files:
+        raise RecipeError("source.files must be a non-empty list")
+    files: list[SourceFileSpec] = []
+    for index, item in enumerate(raw_files):
+        if not isinstance(item, dict):
+            raise RecipeError(f"source.files[{index}] must be an object")
+        relative_path = _text(item, "path")
+        path = Path(relative_path)
+        if path.is_absolute() or ".." in path.parts:
+            raise RecipeError(
+                f"source.files[{index}].path must stay inside the snapshot"
+            )
+        digest = _text(item, "sha256").lower()
+        if len(digest) != 64 or any(
+            character not in "0123456789abcdef" for character in digest
+        ):
+            raise RecipeError(
+                f"source.files[{index}].sha256 must be a hexadecimal SHA-256"
+            )
+        files.append(
+            SourceFileSpec(
+                path=path.as_posix(),
+                url=_url(item, "url"),
+                sha256=digest,
+            )
+        )
+    paths = [item.path for item in files]
+    if len(set(paths)) != len(paths):
+        raise RecipeError("source file paths must be unique")
+    return tuple(files)
