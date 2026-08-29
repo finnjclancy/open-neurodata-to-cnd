@@ -1,0 +1,20 @@
+{
+  "$schema": "../schemas/recipe.schema.json",
+  "recipe_id": "nm000132-flankers-cnd-events", "recipe_version": "0.3.0", "status": "reviewed",
+  "source": {"dataset_id": "nm000132", "provider": "NEMAR", "url": "https://www.nemar.org/dataset/nm000132", "version": "1.1.1", "doi": "10.82901/nemar.nm000132", "primary_path": "sub-001/eeg/sub-001_task-flankers_eeg.set", "files": [{"path": "sub-001/eeg/sub-001_task-flankers_eeg.set", "url": "https://data.nemar.org/nm000132/v1.1.1/sub-001/eeg/sub-001_task-flankers_eeg.set", "sha256": "ea328bd5254b5425f80a8b2db9decaff62f8c6c3c2266b0e6920f489ee6fca8e"}], "require_pinned_version_before_conversion": true},
+  "selection": {"modality": "eeg", "subject": "001", "task": "flankers", "reader": "bids", "extension": ".set", "events_path": "sub-001/eeg/sub-001_task-flankers_events.tsv", "channel_type_policy": "eeg_only", "device_name": "BioSemi ActiveTwo (30 EEG channels)"},
+  "trials": {"unit": "recording_run", "condition_name": "flanker_task", "preserve_full_run": true},
+  "features": [
+    {"name": "congruent_left_onset", "kind": "bids_event_impulse", "source_column": "value", "source_value": "11", "unit": "binary"},
+    {"name": "congruent_right_onset", "kind": "bids_event_impulse", "source_column": "value", "source_value": "12", "unit": "binary"},
+    {"name": "incongruent_left_onset", "kind": "bids_event_impulse", "source_column": "value", "source_value": "21", "unit": "binary"},
+    {"name": "incongruent_right_onset", "kind": "bids_event_impulse", "source_column": "value", "source_value": "22", "unit": "binary"},
+    {"name": "correct_response_onset", "kind": "bids_event_impulse", "source_column": "value", "source_values": ["111", "121", "212", "222"], "unit": "binary"},
+    {"name": "incorrect_response_onset", "kind": "bids_event_impulse", "source_column": "value", "source_values": ["112", "122", "211", "221"], "unit": "binary"}
+  ],
+  "synchronization": {"event_source": "BIDS events.tsv sample and onset columns", "event_sample_policy": "prefer_explicit_sample_and_reconcile_with_onset", "sample_index_origin": 1, "target_sampling_rate_hz": 1024, "resampling": false},
+  "output": {"format": "CND 1.0", "mat_version": "5", "neural_unit": "V", "strict_validation": true, "one_neural_file_per_subject": true, "shared_stimulus_file": true},
+  "validation": {"require_source_checksum": true, "require_source_reconciliation": true, "require_cnd_mne_load": true, "require_round_trip_sample": true, "max_event_quantization_error_samples": 0.5},
+  "license": {"neural_data": "CC-BY-4.0", "stimulus_assets": "No media are embedded; categorical event impulses only", "derived_release": "CC-BY-4.0 with ERP CORE attribution and provenance"},
+  "notes": ["Corpus template: the pinned plan injects each recording's complete BIDS snapshot.", "The continuous recording is preserved without preprocessing; three EOG channels are excluded from the EEG CND matrix."]
+}

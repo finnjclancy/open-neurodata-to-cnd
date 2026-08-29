@@ -5,7 +5,8 @@
 The corpus layer separates three concerns:
 
 1. A **corpus recipe** identifies one immutable remote inventory and defines how
-   recordings are discovered.
+   recordings are discovered. It may declare one experiment or multiple tasks
+   with separate reviewed conversion templates.
 2. A generated **plan** expands the inventory into independent, checksum-pinned
    jobs while downloading only small metadata files.
 3. **Batch execution** instantiates the reviewed experiment recipe for each job,
@@ -13,6 +14,10 @@ The corpus layer separates three concerns:
 
 Experiment meaning remains in the conversion recipe. The corpus layer changes
 subject-relative paths and provenance; it does not infer new event semantics.
+
+Multi-task plans use recording identities such as `sub-001_task-MMN` and pin
+the template recipe digest separately for every job. This prevents a change to
+one task's event semantics from silently affecting another task.
 
 ## Output layout
 
@@ -70,3 +75,21 @@ The ds004574 pilot is selected deterministically from metadata and covers:
 - the longest recording.
 
 This is a structural gate before full-corpus execution, not a scientific sample.
+
+For multi-task corpora, the pilot first selects at least one recording from
+every task, then adds channel-layout, group, and duration extremes as needed.
+
+## Dataset-declared timing and channels
+
+The BIDS event adapter supports either one exact `source_value` or a reviewed
+`source_values` set for a single CND impulse feature. Grouping is useful for
+scientifically meaningful categories such as P3 targets across multiple letter
+codes; the complete list is retained in the recipe and manifest.
+
+`sample_index_origin` is zero by default. A recipe may explicitly set it to one
+when a source dataset stores one-based sample indices. Onset reconciliation is
+still enforced after applying the declared origin.
+
+The `eeg_only` channel policy selects channels already typed as EEG by the
+source metadata and excludes auxiliary channels such as EOG. It does not
+relabel channels.

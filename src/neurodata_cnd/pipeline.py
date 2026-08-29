@@ -199,7 +199,14 @@ def _extract_features(
         events_path = snapshot.root / str(relative_path)
         if not events_path.is_file():
             raise FileNotFoundError(events_path)
-        return bids_event_impulses(raw, events_path, recipe.features)
+        return bids_event_impulses(
+            raw,
+            events_path,
+            recipe.features,
+            sample_index_origin=int(
+                recipe.synchronization.get("sample_index_origin", 0)
+            ),
+        )
     raise ValueError("A recipe must use one supported feature-adapter kind")
 
 
@@ -274,9 +281,15 @@ def _manifest(
                     "source_annotation": feature.source_annotation,
                     "source_column": feature.source_column,
                     "source_value": feature.source_value,
+                    "source_values": (
+                        list(feature.source_values)
+                        if feature.source_values is not None
+                        else None
+                    ),
                 }
                 for feature in recipe.features
             ],
+            "synchronization": dict(recipe.synchronization),
             "trial_policy": recipe.trials["unit"],
             "neural_unit": recipe.output.get("neural_unit", "V"),
         },

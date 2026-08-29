@@ -32,7 +32,7 @@ BIDS / structured source
 
 ## Working vertical slices
 
-The repository contains two executable, checksum-pinned conversions that cover
+The repository contains executable, checksum-pinned conversions that cover
 materially different public-data structures:
 
 - PhysioNet EEG Motor Movement/Imagery subject 1, run 3: one EDF+ file with
@@ -48,6 +48,14 @@ The batch workflow has also converted the complete OpenNeuro `ds004574` corpus:
 146 recordings, 31.04 hours, 55,877,200 samples, and 103,426 mapped events. All
 146 releases passed strict CND and CND-to-MNE validation without warnings. See
 the [full-corpus report](docs/CORPUS-DS004574.md).
+
+The second complete corpus is [ERP CORE](docs/CORPUS-NM000132.md): 40
+participants × six paradigms = 240 recordings, 37.75 hours, 139,146,240
+samples, and 153,677 reviewed event impulses. This conversion adds multi-task
+planning, grouped BIDS event selectors, explicit one-based sample-index
+reconciliation, and selection of 30 EEG channels from recordings that also
+contain three EOG channels. All 240 releases passed strict CND and CND-to-MNE
+validation.
 
 ```bash
 uv sync --extra dev
@@ -93,6 +101,11 @@ uv run neurodata-to-cnd batch plans/ds004574-v0.2.0.json \
 uv run neurodata-to-cnd status outputs/ds004574/0.2.0
 uv run neurodata-to-cnd retry plans/ds004574-v0.2.0.json \
   --cache-root cache/corpus-v0.2 --output-root outputs
+
+uv run neurodata-to-cnd plan corpora/nm000132.json \
+  --output plans/nm000132-v0.3.0.json
+uv run neurodata-to-cnd batch plans/nm000132-v0.3.0.json \
+  --cache-root cache/corpus-v0.3 --output-root outputs
 ```
 
 Each recording has its own state and manifest. `index.jsonl` contains one row

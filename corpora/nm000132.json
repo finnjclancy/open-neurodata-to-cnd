@@ -1,0 +1,64 @@
+{
+  "$schema": "../schemas/corpus-recipe.schema.json",
+  "corpus_id": "nm000132",
+  "corpus_version": "0.3.0",
+  "status": "active",
+  "inventory": {
+    "url": "https://data.nemar.org/nm000132/v1.1.1/manifest.json",
+    "canonical_sha256": "0dbfc1f93df8bf90f4c34e7697fec82ae9f0c6af217f0f08b5528354482f5336"
+  },
+  "source": {
+    "dataset_id": "nm000132",
+    "provider": "NEMAR",
+    "version": "1.1.1",
+    "url": "https://www.nemar.org/dataset/nm000132",
+    "doi": "10.82901/nemar.nm000132"
+  },
+  "layout": {
+    "shared_paths": ["dataset_description.json"],
+    "experiments": [
+      {
+        "task": "MMN",
+        "template_recipe": "../recipes/nm000132-mmn.json",
+        "paths": ["task-MMN_events.json", "sub-{subject}/eeg/sub-{subject}_coordsystem.json", "sub-{subject}/eeg/sub-{subject}_electrodes.tsv", "sub-{subject}/eeg/sub-{subject}_task-MMN_channels.tsv", "sub-{subject}/eeg/sub-{subject}_task-MMN_eeg.fdt", "sub-{subject}/eeg/sub-{subject}_task-MMN_eeg.json", "sub-{subject}/eeg/sub-{subject}_task-MMN_eeg.set", "sub-{subject}/eeg/sub-{subject}_task-MMN_events.tsv"],
+        "primary_path": "sub-{subject}/eeg/sub-{subject}_task-MMN_eeg.set",
+        "metadata_path": "sub-{subject}/eeg/sub-{subject}_task-MMN_eeg.json"
+      },
+      {
+        "task": "N170",
+        "template_recipe": "../recipes/nm000132-n170.json",
+        "paths": ["task-N170_events.json", "sub-{subject}/eeg/sub-{subject}_coordsystem.json", "sub-{subject}/eeg/sub-{subject}_electrodes.tsv", "sub-{subject}/eeg/sub-{subject}_task-N170_channels.tsv", "sub-{subject}/eeg/sub-{subject}_task-N170_eeg.fdt", "sub-{subject}/eeg/sub-{subject}_task-N170_eeg.json", "sub-{subject}/eeg/sub-{subject}_task-N170_eeg.set", "sub-{subject}/eeg/sub-{subject}_task-N170_events.tsv"],
+        "primary_path": "sub-{subject}/eeg/sub-{subject}_task-N170_eeg.set",
+        "metadata_path": "sub-{subject}/eeg/sub-{subject}_task-N170_eeg.json"
+      },
+      {
+        "task": "N2pc",
+        "template_recipe": "../recipes/nm000132-n2pc.json",
+        "paths": ["task-N2pc_events.json", "sub-{subject}/eeg/sub-{subject}_coordsystem.json", "sub-{subject}/eeg/sub-{subject}_electrodes.tsv", "sub-{subject}/eeg/sub-{subject}_task-N2pc_channels.tsv", "sub-{subject}/eeg/sub-{subject}_task-N2pc_eeg.fdt", "sub-{subject}/eeg/sub-{subject}_task-N2pc_eeg.json", "sub-{subject}/eeg/sub-{subject}_task-N2pc_eeg.set", "sub-{subject}/eeg/sub-{subject}_task-N2pc_events.tsv"],
+        "primary_path": "sub-{subject}/eeg/sub-{subject}_task-N2pc_eeg.set",
+        "metadata_path": "sub-{subject}/eeg/sub-{subject}_task-N2pc_eeg.json"
+      },
+      {
+        "task": "N400",
+        "template_recipe": "../recipes/nm000132-n400.json",
+        "paths": ["task-N400_events.json", "sub-{subject}/eeg/sub-{subject}_coordsystem.json", "sub-{subject}/eeg/sub-{subject}_electrodes.tsv", "sub-{subject}/eeg/sub-{subject}_task-N400_channels.tsv", "sub-{subject}/eeg/sub-{subject}_task-N400_eeg.fdt", "sub-{subject}/eeg/sub-{subject}_task-N400_eeg.json", "sub-{subject}/eeg/sub-{subject}_task-N400_eeg.set", "sub-{subject}/eeg/sub-{subject}_task-N400_events.tsv"],
+        "primary_path": "sub-{subject}/eeg/sub-{subject}_task-N400_eeg.set",
+        "metadata_path": "sub-{subject}/eeg/sub-{subject}_task-N400_eeg.json"
+      },
+      {
+        "task": "P3",
+        "template_recipe": "../recipes/nm000132-p3.json",
+        "paths": ["task-P3_events.json", "sub-{subject}/eeg/sub-{subject}_coordsystem.json", "sub-{subject}/eeg/sub-{subject}_electrodes.tsv", "sub-{subject}/eeg/sub-{subject}_task-P3_channels.tsv", "sub-{subject}/eeg/sub-{subject}_task-P3_eeg.fdt", "sub-{subject}/eeg/sub-{subject}_task-P3_eeg.json", "sub-{subject}/eeg/sub-{subject}_task-P3_eeg.set", "sub-{subject}/eeg/sub-{subject}_task-P3_events.tsv"],
+        "primary_path": "sub-{subject}/eeg/sub-{subject}_task-P3_eeg.set",
+        "metadata_path": "sub-{subject}/eeg/sub-{subject}_task-P3_eeg.json"
+      },
+      {
+        "task": "flankers",
+        "template_recipe": "../recipes/nm000132-flankers.json",
+        "paths": ["task-flankers_events.json", "sub-{subject}/eeg/sub-{subject}_coordsystem.json", "sub-{subject}/eeg/sub-{subject}_electrodes.tsv", "sub-{subject}/eeg/sub-{subject}_task-flankers_channels.tsv", "sub-{subject}/eeg/sub-{subject}_task-flankers_eeg.fdt", "sub-{subject}/eeg/sub-{subject}_task-flankers_eeg.json", "sub-{subject}/eeg/sub-{subject}_task-flankers_eeg.set", "sub-{subject}/eeg/sub-{subject}_task-flankers_events.tsv"],
+        "primary_path": "sub-{subject}/eeg/sub-{subject}_task-flankers_eeg.set",
+        "metadata_path": "sub-{subject}/eeg/sub-{subject}_task-flankers_eeg.json"
+      }
+    ]
+  }
+}

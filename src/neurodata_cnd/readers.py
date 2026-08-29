@@ -80,6 +80,17 @@ def read_raw(
         if not evidence:
             raise ValueError("all_eeg channel typing requires recorded evidence")
         raw.set_channel_types({name: "eeg" for name in raw.ch_names}, verbose="ERROR")
+    elif channel_type_policy == "eeg_only":
+        eeg_channels = [
+            name
+            for name, channel_type in zip(
+                raw.ch_names, raw.get_channel_types(), strict=True
+            )
+            if channel_type == "eeg"
+        ]
+        if not eeg_channels:
+            raise ValueError("The source recording contains no EEG channels")
+        raw.pick(eeg_channels)
     elif channel_type_policy not in {None, "source"}:
         raise ValueError(f"Unsupported channel type policy {channel_type_policy!r}")
     if any(channel_type != "eeg" for channel_type in raw.get_channel_types()):

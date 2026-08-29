@@ -51,6 +51,20 @@ def test_pilot_selection_covers_channel_layouts_groups_and_extremes() -> None:
     assert set(selected) == {job["recording_id"] for job in jobs}
 
 
+def test_erp_core_corpus_recipe_declares_all_six_experiments() -> None:
+    root = Path(__file__).resolve().parents[1]
+    recipe = corpus.load_corpus_recipe(root / "corpora" / "nm000132.json")
+
+    assert [experiment.task for experiment in recipe.experiments] == [
+        "MMN",
+        "N170",
+        "N2pc",
+        "N400",
+        "P3",
+        "flankers",
+    ]
+
+
 def test_batch_is_resumable_and_builds_index(tmp_path: Path, monkeypatch) -> None:
     raw = synthetic_raw()
     source = tmp_path / "source_raw.fif"

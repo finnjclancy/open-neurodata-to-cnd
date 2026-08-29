@@ -50,6 +50,7 @@ class FeatureSpec:
     source_annotation: str | None = None
     source_column: str | None = None
     source_value: str | None = None
+    source_values: tuple[str, ...] | None = None
     description: str | None = None
 
 
@@ -105,15 +106,39 @@ def load_recipe(path: str | Path) -> ConversionRecipe:
         source_annotation = _optional_text(feature, "source_annotation")
         source_column = _optional_text(feature, "source_column")
         source_value = _optional_text(feature, "source_value")
+        raw_source_values = feature.get("source_values")
+        source_values: tuple[str, ...] | None = None
+        if raw_source_values is not None:
+            if (
+                not isinstance(raw_source_values, list)
+                or not raw_source_values
+                or any(
+                    not isinstance(value, str) or not value.strip()
+                    for value in raw_source_values
+                )
+            ):
+                raise RecipeError(
+                    f"features[{index}].source_values must be a non-empty string list"
+                )
+            source_values = tuple(value.strip() for value in raw_source_values)
+            if len(set(source_values)) != len(source_values):
+                raise RecipeError(
+                    f"features[{index}].source_values must not contain duplicates"
+                )
+        if source_value is not None and source_values is not None:
+            raise RecipeError(
+                f"features[{index}] must use source_value or source_values, not both"
+            )
         if kind == "annotation_impulse" and source_annotation is None:
             raise RecipeError(
                 f"features[{index}] annotation impulses require source_annotation"
             )
         if kind == "bids_event_impulse" and (
-            source_column is None or source_value is None
+            source_column is None or (source_value is None and source_values is None)
         ):
             raise RecipeError(
-                f"features[{index}] BIDS impulses require source_column/source_value"
+                f"features[{index}] BIDS impulses require source_column and "
+                "source_value or source_values"
             )
         feature_specs.append(
             FeatureSpec(
@@ -123,6 +148,7 @@ def load_recipe(path: str | Path) -> ConversionRecipe:
                 source_annotation=source_annotation,
                 source_column=source_column,
                 source_value=source_value,
+                source_values=source_values,
                 description=_optional_text(feature, "description"),
             )
         )
@@ -135,6 +161,7 @@ def load_recipe(path: str | Path) -> ConversionRecipe:
             feature.source_annotation,
             feature.source_column,
             feature.source_value,
+            feature.source_values,
         )
         for feature in feature_specs
     ]

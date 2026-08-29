@@ -26,12 +26,20 @@ class CorpusPlanError(ValueError):
 
 
 @dataclass(slots=True, frozen=True)
+class CorpusExperiment:
+    task: str
+    template_recipe: Path
+    paths: tuple[str, ...]
+    primary_path: str
+    metadata_path: str
+
+
+@dataclass(slots=True, frozen=True)
 class CorpusRecipe:
     path: Path
     corpus_id: str
     corpus_version: str
     status: str
-    template_recipe: Path
     inventory_url: str
     inventory_sha256: str
     dataset_id: str
@@ -39,10 +47,7 @@ class CorpusRecipe:
     source_version: str
     source_url: str
     source_doi: str | None
-    task: str
-    extension: str
-    shared_paths: tuple[str, ...]
-    recording_suffixes: tuple[str, ...]
+    experiments: tuple[CorpusExperiment, ...]
     participants_path: str | None
 
 
@@ -50,7 +55,6 @@ def load_corpus_recipe(path: str | Path) -> CorpusRecipe:
     """Load one dataset-level planning recipe."""
     resolved = Path(path).expanduser().resolve()
     payload = _read_json(resolved)
-    template = (resolved.parent / str(payload["template_recipe"])).resolve()
     inventory = _object(payload, "inventory")
     source = _object(payload, "source")
     layout = _object(payload, "layout")
@@ -59,12 +63,12 @@ def load_corpus_recipe(path: str | Path) -> CorpusRecipe:
         raise CorpusPlanError(
             "inventory.canonical_sha256 must be a hexadecimal SHA-256"
         )
+    experiments = _corpus_experiments(resolved, payload, layout)
     return CorpusRecipe(
         path=resolved,
         corpus_id=str(payload["corpus_id"]),
         corpus_version=str(payload["corpus_version"]),
         status=str(payload["status"]),
-        template_recipe=template,
         inventory_url=str(inventory["url"]),
         inventory_sha256=digest,
         dataset_id=str(source["dataset_id"]),
@@ -72,16 +76,72 @@ def load_corpus_recipe(path: str | Path) -> CorpusRecipe:
         source_version=str(source["version"]),
         source_url=str(source["url"]),
         source_doi=str(source["doi"]) if source.get("doi") else None,
-        task=str(layout["task"]),
-        extension=str(layout["extension"]),
-        shared_paths=tuple(str(value) for value in layout["shared_paths"]),
-        recording_suffixes=tuple(str(value) for value in layout["recording_suffixes"]),
+        experiments=experiments,
         participants_path=(
             str(layout["participants_path"])
             if layout.get("participants_path")
             else None
         ),
     )
+
+
+def _corpus_experiments(
+    recipe_path: Path, payload: dict[str, Any], layout: dict[str, Any]
+) -> tuple[CorpusExperiment, ...]:
+    raw_experiments = layout.get("experiments")
+    experiments: list[CorpusExperiment] = []
+    if raw_experiments is None:
+        task = str(layout["task"])
+        extension = str(layout["extension"])
+        shared_paths = [str(value) for value in layout["shared_paths"]]
+        suffixes = [str(value) for value in layout["recording_suffixes"]]
+        prefix = f"sub-{{subject}}/eeg/sub-{{subject}}_task-{task}"
+        experiments.append(
+            CorpusExperiment(
+                task=task,
+                template_recipe=(
+                    recipe_path.parent / str(payload["template_recipe"])
+                ).resolve(),
+                paths=tuple(
+                    [*shared_paths, *(f"{prefix}{suffix}" for suffix in suffixes)]
+                ),
+                primary_path=f"{prefix}_eeg{extension}",
+                metadata_path=f"{prefix}_eeg.json",
+            )
+        )
+    else:
+        if not isinstance(raw_experiments, list) or not raw_experiments:
+            raise CorpusPlanError("layout.experiments must be a non-empty list")
+        shared_paths = [str(value) for value in layout.get("shared_paths", [])]
+        for index, value in enumerate(raw_experiments):
+            if not isinstance(value, dict):
+                raise CorpusPlanError(f"layout.experiments[{index}] must be an object")
+            task = str(value["task"])
+            paths = [*shared_paths, *(str(path) for path in value["paths"])]
+            experiments.append(
+                CorpusExperiment(
+                    task=task,
+                    template_recipe=(
+                        recipe_path.parent / str(value["template_recipe"])
+                    ).resolve(),
+                    paths=tuple(paths),
+                    primary_path=str(value["primary_path"]),
+                    metadata_path=str(value["metadata_path"]),
+                )
+            )
+    tasks = [experiment.task for experiment in experiments]
+    if len(set(tasks)) != len(tasks):
+        raise CorpusPlanError("Corpus experiment task names must be unique")
+    for experiment in experiments:
+        if not experiment.template_recipe.is_file():
+            raise FileNotFoundError(experiment.template_recipe)
+        for path in (
+            *experiment.paths,
+            experiment.primary_path,
+            experiment.metadata_path,
+        ):
+            _render_path(path, "001", experiment.task)
+    return tuple(experiments)
 
 
 def plan_corpus(
@@ -118,15 +178,21 @@ def plan_corpus(
             f"expected {recipe.inventory_sha256}, observed {observed}"
         )
     by_path = {str(entry["path"]): entry for entry in entries}
-    subjects = _discover_subjects(by_path, recipe)
     participant_metadata = _participant_metadata(by_path, recipe)
+    destination = Path(output_path).expanduser().resolve()
 
     jobs: list[dict[str, Any]] = []
+    discovered = [
+        (experiment, _discover_subjects(by_path, experiment))
+        for experiment in recipe.experiments
+    ]
+    multiple_experiments = len(discovered) > 1
     metadata_entries: list[tuple[str, dict[str, Any]]] = []
-    for subject in subjects:
-        prefix = f"sub-{subject}/eeg/sub-{subject}_task-{recipe.task}"
-        path = f"{prefix}_eeg.json"
-        metadata_entries.append((subject, _entry(by_path, path)))
+    for experiment, subjects in discovered:
+        for subject in subjects:
+            recording_id = _recording_id(subject, experiment.task, multiple_experiments)
+            path = _render_path(experiment.metadata_path, subject, experiment.task)
+            metadata_entries.append((recording_id, _entry(by_path, path)))
     with ThreadPoolExecutor(max_workers=12) as executor:
         recording_metadata = dict(
             executor.map(
@@ -134,50 +200,58 @@ def plan_corpus(
             )
         )
 
-    for subject in subjects:
-        prefix = f"sub-{subject}/eeg/sub-{subject}_task-{recipe.task}"
-        recording_paths = [f"{prefix}{suffix}" for suffix in recipe.recording_suffixes]
-        paths = [*recipe.shared_paths, *recording_paths]
-        file_entries = [_entry(by_path, path) for path in paths]
-        primary_path = f"{prefix}_eeg{recipe.extension}"
-        if primary_path not in paths:
-            raise CorpusPlanError(f"Primary recording is undeclared for sub-{subject}")
-        metadata = recording_metadata[subject]
-        participant = participant_metadata.get(f"sub-{subject}", {})
-        jobs.append(
-            {
-                "recording_id": f"sub-{subject}",
-                "subject": subject,
-                "task": recipe.task,
-                "primary_path": primary_path,
-                "source_bytes": sum(int(entry["size"]) for entry in file_entries),
-                "expected": {
-                    "channels": int(metadata["EEGChannelCount"]),
-                    "sampling_frequency_hz": float(metadata["SamplingFrequency"]),
-                    "duration_seconds": float(metadata["RecordingDuration"]),
-                },
-                "participant": {
-                    key: participant[key]
-                    for key in ("GROUP",)
-                    if participant.get(key) not in {None, "", "n/a"}
-                },
-                "files": [_plan_file(entry) for entry in file_entries],
-            }
-        )
+    selected_paths: set[str] = set()
+    for experiment, subjects in discovered:
+        for subject in subjects:
+            recording_id = _recording_id(subject, experiment.task, multiple_experiments)
+            paths = [
+                _render_path(path, subject, experiment.task)
+                for path in experiment.paths
+            ]
+            file_entries = [_entry(by_path, path) for path in paths]
+            primary_path = _render_path(
+                experiment.primary_path, subject, experiment.task
+            )
+            if primary_path not in paths:
+                raise CorpusPlanError(
+                    f"Primary recording is undeclared for {recording_id}"
+                )
+            metadata = recording_metadata[recording_id]
+            participant = participant_metadata.get(f"sub-{subject}", {})
+            selected_paths.update(paths)
+            jobs.append(
+                {
+                    "recording_id": recording_id,
+                    "subject": subject,
+                    "task": experiment.task,
+                    "template_recipe": os.path.relpath(
+                        experiment.template_recipe, start=destination.parent
+                    ),
+                    "template_recipe_sha256": hashlib.sha256(
+                        experiment.template_recipe.read_bytes()
+                    ).hexdigest(),
+                    "primary_path": primary_path,
+                    "source_bytes": sum(int(entry["size"]) for entry in file_entries),
+                    "expected": {
+                        "channels": int(metadata["EEGChannelCount"]),
+                        "sampling_frequency_hz": float(metadata["SamplingFrequency"]),
+                        "duration_seconds": float(metadata["RecordingDuration"]),
+                    },
+                    "participant": {
+                        key: participant[key]
+                        for key in ("GROUP",)
+                        if participant.get(key) not in {None, "", "n/a"}
+                    },
+                    "files": [_plan_file(entry) for entry in file_entries],
+                }
+            )
 
-    pilot = _select_pilot(jobs, count=5)
-    destination = Path(output_path).expanduser().resolve()
+    pilot = _select_pilot(jobs, count=max(5, len(recipe.experiments)))
     plan = {
         "plan_version": "1.0.0",
         "corpus_id": recipe.corpus_id,
         "corpus_version": recipe.corpus_version,
         "generated_at": _now(),
-        "template_recipe": os.path.relpath(
-            recipe.template_recipe, start=destination.parent
-        ),
-        "template_recipe_sha256": hashlib.sha256(
-            recipe.template_recipe.read_bytes()
-        ).hexdigest(),
         "source": {
             "dataset_id": recipe.dataset_id,
             "provider": recipe.provider,
@@ -187,14 +261,8 @@ def plan_corpus(
             "inventory_url": recipe.inventory_url,
             "inventory_canonical_sha256": recipe.inventory_sha256,
         },
-        "shared_paths": list(recipe.shared_paths),
         "recording_count": len(jobs),
-        "source_bytes": sum(
-            int(entry["size"])
-            for path, entry in by_path.items()
-            if path in set(recipe.shared_paths)
-            or any(path.startswith(f"sub-{subject}/eeg/") for subject in subjects)
-        ),
+        "source_bytes": sum(int(by_path[path]["size"]) for path in selected_paths),
         "pilot_recording_ids": pilot,
         "jobs": jobs,
     }
@@ -350,9 +418,15 @@ def _convert_recording(*args: Any, **kwargs: Any) -> Any:
 
 
 def _job_recipe(plan: dict[str, Any], job: dict[str, Any]) -> ConversionRecipe:
-    template = Path(str(plan["_plan_directory"])) / str(plan["template_recipe"])
+    template_value = job.get("template_recipe", plan.get("template_recipe"))
+    template_digest = job.get(
+        "template_recipe_sha256", plan.get("template_recipe_sha256")
+    )
+    if template_value is None or template_digest is None:
+        raise CorpusPlanError(f"Job {job['recording_id']} has no pinned template")
+    template = Path(str(plan["_plan_directory"])) / str(template_value)
     observed_template_digest = hashlib.sha256(template.read_bytes()).hexdigest()
-    if observed_template_digest != str(plan["template_recipe_sha256"]):
+    if observed_template_digest != str(template_digest):
         raise CorpusPlanError(
             "Template recipe changed after corpus planning; create a new plan/version"
         )
@@ -384,6 +458,7 @@ def _job_recipe(plan: dict[str, Any], job: dict[str, Any]) -> ConversionRecipe:
     )
     selection = dict(base.selection)
     selection["subject"] = str(job["subject"])
+    selection["task"] = str(job["task"])
     event_paths = [
         str(item["path"])
         for item in job["files"]
@@ -395,10 +470,11 @@ def _job_recipe(plan: dict[str, Any], job: dict[str, Any]) -> ConversionRecipe:
                 f"Expected one events table for {job['recording_id']}"
             )
         selection["events_path"] = event_paths[0]
-    selection["channel_type_evidence"] = (
-        f"BIDS sidecar declares EEGChannelCount={job['expected']['channels']}; "
-        "the source channels table records channel type as n/a."
-    )
+    if selection.get("channel_type_policy") == "all_eeg":
+        selection["channel_type_evidence"] = (
+            f"BIDS sidecar declares EEGChannelCount={job['expected']['channels']}; "
+            "the source channels table records channel type as n/a."
+        )
     output = dict(base.output)
     output["release_id"] = (
         f"{plan['corpus_id']}/{plan['corpus_version']}/{job['recording_id']}"
@@ -414,20 +490,47 @@ def _job_recipe(plan: dict[str, Any], job: dict[str, Any]) -> ConversionRecipe:
 
 
 def _discover_subjects(
-    by_path: dict[str, dict[str, Any]], recipe: CorpusRecipe
+    by_path: dict[str, dict[str, Any]], experiment: CorpusExperiment
 ) -> list[str]:
-    pattern = re.compile(
-        rf"^sub-(?P<subject>[^/]+)/eeg/sub-(?P=subject)_task-"
-        rf"{re.escape(recipe.task)}_eeg{re.escape(recipe.extension)}$"
+    rendered = experiment.primary_path.replace("{task}", experiment.task)
+    pieces = rendered.split("{subject}")
+    if len(pieces) < 2:
+        raise CorpusPlanError("Experiment primary_path must contain {subject}")
+    expression = re.escape(pieces[0]) + r"(?P<subject>[^/]+)"
+    expression += "".join(
+        re.escape(piece)
+        if index == len(pieces) - 1
+        else re.escape(piece) + r"(?P=subject)"
+        for index, piece in enumerate(pieces[1:], start=1)
     )
+    pattern = re.compile(f"^{expression}$")
     subjects = sorted(
         match.group("subject")
         for path in by_path
         if (match := pattern.match(path)) is not None
     )
     if not subjects:
-        raise CorpusPlanError("No recordings match the corpus layout")
+        raise CorpusPlanError(
+            f"No recordings match the corpus layout for task {experiment.task}"
+        )
     return subjects
+
+
+def _render_path(template: str, subject: str, task: str) -> str:
+    try:
+        rendered = template.format(subject=subject, task=task)
+    except (KeyError, ValueError) as error:
+        raise CorpusPlanError(f"Invalid corpus path template {template!r}") from error
+    path = Path(rendered)
+    if path.is_absolute() or ".." in path.parts:
+        raise CorpusPlanError(f"Corpus path must stay inside the snapshot: {rendered}")
+    return path.as_posix()
+
+
+def _recording_id(subject: str, task: str, multiple_experiments: bool) -> str:
+    if multiple_experiments:
+        return f"sub-{subject}_task-{task}"
+    return f"sub-{subject}"
 
 
 def _participant_metadata(
@@ -482,10 +585,12 @@ def _plan_file(entry: dict[str, Any]) -> dict[str, Any]:
 
 def _select_pilot(jobs: list[dict[str, Any]], count: int) -> list[str]:
     selected: list[dict[str, Any]] = []
+    for task in dict.fromkeys(str(job["task"]) for job in jobs):
+        selected.append(next(job for job in jobs if job["task"] == task))
     for channel_count in sorted({job["expected"]["channels"] for job in jobs}):
-        selected.append(
-            next(job for job in jobs if job["expected"]["channels"] == channel_count)
-        )
+        job = next(job for job in jobs if job["expected"]["channels"] == channel_count)
+        if job not in selected:
+            selected.append(job)
     extremes = sorted(jobs, key=lambda job: job["expected"]["duration_seconds"])
     for job in (extremes[0], extremes[-1]):
         if job not in selected:
@@ -578,7 +683,10 @@ def _rebuild_indexes(plan: dict[str, Any], corpus_root: Path) -> dict[str, Any]:
             {key: int(value) for key, value in row.get("event_counts", {}).items()}
         )
     channel_counts = Counter(str(row["channels"]) for row in complete_rows)
-    group_counts = Counter(str(row["group"]) for row in complete_rows)
+    group_counts = Counter(
+        str(row["group"]) for row in complete_rows if row["group"] is not None
+    )
+    task_counts = Counter(str(row["task"]) for row in complete_rows)
     summary = {
         "corpus_id": plan["corpus_id"],
         "corpus_version": plan["corpus_version"],
@@ -601,6 +709,7 @@ def _rebuild_indexes(plan: dict[str, Any], corpus_root: Path) -> dict[str, Any]:
         "event_counts": dict(sorted(event_counts.items())),
         "channel_count_distribution": dict(sorted(channel_counts.items())),
         "group_distribution": dict(sorted(group_counts.items())),
+        "task_distribution": dict(sorted(task_counts.items())),
         "completed_canonical_content_sha256": _corpus_content_digest(complete_rows),
         "failed_recording_ids": [
             row["recording_id"] for row in rows if row["status"] == "failed"

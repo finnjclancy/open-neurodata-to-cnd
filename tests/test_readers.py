@@ -62,3 +62,20 @@ def test_explicit_eeg_channel_correction_requires_evidence(tmp_path: Path) -> No
         },
     )
     assert loaded.get_channel_types() == ["eeg", "eeg"]
+
+
+def test_eeg_only_channel_policy_excludes_auxiliary_channels(tmp_path: Path) -> None:
+    raw = synthetic_raw()
+    auxiliary = mne.io.RawArray(
+        [[0.0] * raw.n_times],
+        mne.create_info(["VEOG"], raw.info["sfreq"], ["eog"]),
+        verbose="ERROR",
+    )
+    raw.add_channels([auxiliary])
+    source = tmp_path / "mixed_raw.fif"
+    raw.save(source, overwrite=True, verbose="ERROR")
+
+    loaded = read_raw(source, {"reader": "fif", "channel_type_policy": "eeg_only"})
+
+    assert loaded.ch_names == ["Fz", "Cz"]
+    assert loaded.get_channel_types() == ["eeg", "eeg"]

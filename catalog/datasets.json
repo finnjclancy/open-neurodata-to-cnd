@@ -1,6 +1,6 @@
 {
   "catalog_version": "0.1.0",
-  "reviewed_at": "2026-08-28",
+  "reviewed_at": "2026-08-29",
   "datasets": [
     {
       "id": "ds007808",
@@ -157,6 +157,19 @@
       "status": "awaiting-meg-support",
       "scale": {"participants_overall": 1859, "size_gb_approx": 633},
       "tags": ["MEG", "cognition", "rest", "phenotyping", "BIDS"]
+    },
+    {
+      "id": "nm000132",
+      "name": "ERP CORE",
+      "url": "https://www.nemar.org/dataset/nm000132",
+      "provider": "NEMAR",
+      "modalities": ["eeg"],
+      "access": "open",
+      "license": "CC-BY-4.0",
+      "priority": 13,
+      "status": "converted",
+      "scale": {"subjects": 40, "recordings": 240, "size_gb": 14.1},
+      "tags": ["ERP", "BIDS", "MMN", "N170", "N2pc", "N400", "P3", "ERN", "LRP"]
     }
   ]
 }

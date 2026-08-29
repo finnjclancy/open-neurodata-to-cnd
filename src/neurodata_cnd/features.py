@@ -71,8 +71,12 @@ def bids_event_impulses(
     raw: mne.io.BaseRaw,
     events_path: str | Path,
     specifications: tuple[FeatureSpec, ...],
+    *,
+    sample_index_origin: int = 0,
 ) -> ExtractedFeatures:
     """Map reviewed BIDS event-table values to source-clock impulse vectors."""
+    if sample_index_origin not in {0, 1}:
+        raise ValueError("BIDS sample_index_origin must be 0 or 1")
     with Path(events_path).open(encoding="utf-8", newline="") as handle:
         rows = list(csv.DictReader(handle, delimiter="\t"))
     if not rows or "onset" not in rows[0]:
@@ -84,29 +88,40 @@ def bids_event_impulses(
     sfreq = float(raw.info["sfreq"])
     for specification in specifications:
         column = specification.source_column
-        value = specification.source_value
-        if column is None or value is None:
-            raise ValueError("BIDS event feature lacks source_column/source_value")
+        values = (
+            (specification.source_value,)
+            if specification.source_value is not None
+            else specification.source_values
+        )
+        if column is None or values is None:
+            raise ValueError(
+                "BIDS event feature lacks source_column and event value selector"
+            )
         if column not in rows[0]:
             raise ValueError(f"BIDS event table lacks reviewed column {column!r}")
-        matching = [row for row in rows if row.get(column) == value]
+        matching = [row for row in rows if row.get(column) in values]
         if not matching:
+            selector = values[0] if len(values) == 1 else list(values)
             raise MissingAnnotationError(
-                f"No BIDS events match {column}={value!r} for {specification.name!r}"
+                f"No BIDS events match {column}={selector!r} for {specification.name!r}"
             )
         impulse = np.zeros(raw.n_times, dtype=np.float64)
         for row in matching:
             onset = float(row["onset"])
             onset_sample = int(round(onset * sfreq))
             source_sample = _optional_sample(row.get("sample"))
-            sample = onset_sample if source_sample is None else source_sample
+            sample = (
+                onset_sample
+                if source_sample is None
+                else source_sample - sample_index_origin
+            )
             if sample < 0 or sample >= raw.n_times:
                 raise ValueError(
-                    f"BIDS event {column}={value!r} maps outside the signal"
+                    f"BIDS event {column}={row.get(column)!r} maps outside the signal"
                 )
             if impulse[sample] != 0:
                 raise ValueError(
-                    f"Multiple {column}={value!r} events occupy sample {sample}"
+                    f"Multiple selected {column} events occupy sample {sample}"
                 )
             quantization_errors.append(abs(sample / sfreq - onset))
             impulse[sample] = 1.0
