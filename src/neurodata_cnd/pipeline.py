@@ -50,6 +50,7 @@ def convert_recipe(
     output_root: str | Path,
     source_override: str | Path | None = None,
     overwrite: bool = False,
+    destination: str | Path | None = None,
 ) -> ConversionResult:
     """Execute one pinned single-recording recipe and verify its CND round trip."""
     resolved_recipe = (
@@ -103,12 +104,14 @@ def convert_recipe(
     strict_report = validate_cnd(recording, strict_spec=True)
     strict_report.raise_for_errors()
 
-    destination = (
-        Path(output_root).expanduser().resolve()
+    resolved_destination = (
+        Path(destination).expanduser().resolve()
+        if destination is not None
+        else Path(output_root).expanduser().resolve()
         / resolved_recipe.source.dataset_id
         / resolved_recipe.recipe_version
     )
-    staging = _new_staging_directory(destination)
+    staging = _new_staging_directory(resolved_destination)
     try:
         mat_version = cast(
             Literal["5", "7.3"], str(resolved_recipe.output.get("mat_version", "5"))
@@ -154,16 +157,16 @@ def convert_recipe(
             _content_sha256(round_trip),
         )
         _write_json_atomic(staging / "manifest.json", manifest, overwrite=False)
-        _publish_staging(staging, destination, overwrite=overwrite)
+        _publish_staging(staging, resolved_destination, overwrite=overwrite)
     except BaseException:
         shutil.rmtree(staging, ignore_errors=True)
         raise
 
-    neural_path = destination / "dataCND" / paths.neural.name
-    stimulus_path = destination / "dataCND" / paths.stimulus.name
-    manifest_path = destination / "manifest.json"
+    neural_path = resolved_destination / "dataCND" / paths.neural.name
+    stimulus_path = resolved_destination / "dataCND" / paths.stimulus.name
+    manifest_path = resolved_destination / "manifest.json"
     return ConversionResult(
-        output_directory=destination,
+        output_directory=resolved_destination,
         neural_path=neural_path,
         stimulus_path=stimulus_path,
         manifest_path=manifest_path,
@@ -213,6 +216,9 @@ def _manifest(
     content_sha256: str,
 ) -> dict[str, Any]:
     duration = raw.n_times / float(raw.info["sfreq"])
+    primary_record = next(
+        item for item in snapshot.files if item["path"] == recipe.source.primary_path
+    )
     output_files = []
     for path in (neural_path, stimulus_path):
         output_files.append(
@@ -224,7 +230,9 @@ def _manifest(
         )
     return {
         "manifest_version": "1.0.0",
-        "release_id": f"{recipe.source.dataset_id}/{recipe.recipe_version}",
+        "release_id": recipe.output.get(
+            "release_id", f"{recipe.source.dataset_id}/{recipe.recipe_version}"
+        ),
         "status": "validated-local-build",
         "source": {
             "dataset_id": recipe.source.dataset_id,
@@ -233,10 +241,12 @@ def _manifest(
             "doi": recipe.source.doi,
             "url": recipe.source.url,
             "size_bytes": snapshot.size_bytes,
-            "sha256": next(
-                item["sha256"]
-                for item in snapshot.files
-                if item["path"] == recipe.source.primary_path
+            "sha256": primary_record.get("sha256"),
+            "primary_checksum_algorithm": primary_record.get(
+                "checksum_algorithm", "sha256"
+            ),
+            "primary_checksum": primary_record.get(
+                "checksum", primary_record.get("sha256")
             ),
             "snapshot_sha256": snapshot.sha256,
             "primary_path": recipe.source.primary_path,

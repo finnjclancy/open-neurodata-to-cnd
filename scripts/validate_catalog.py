@@ -12,7 +12,7 @@ ROOT = Path(__file__).resolve().parents[1]
 CATALOG = ROOT / "catalog" / "datasets.json"
 JSON_FILES = sorted(
     path
-    for directory in ("catalog", "recipes", "manifests", "schemas")
+    for directory in ("catalog", "corpora", "recipes", "manifests", "schemas")
     for path in (ROOT / directory).glob("*.json")
 )
 

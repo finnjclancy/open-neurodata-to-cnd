@@ -22,9 +22,11 @@ jobs:
       - name: Run public-dependency tests
         run: >-
           pytest
+          tests/test_corpus.py
           tests/test_features.py
           tests/test_metadata.py
           tests/test_readers.py
+          tests/test_source.py
       - name: Run static checks
         run: |
           ruff check .

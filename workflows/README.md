@@ -1,6 +1,20 @@
 # Workflows
 
-## Commands to converge on
+## Implemented corpus commands
+
+```text
+neurodata-to-cnd plan <corpus-recipe> --output <plan>
+neurodata-to-cnd batch <plan> [--pilot] [--recording sub-NNN]
+neurodata-to-cnd status <corpus-output-directory>
+neurodata-to-cnd retry <plan>
+```
+
+`batch` is sequential by default to bound memory, disk, and remote-service load.
+Completed manifests are reconciled with state and skipped. Failures are recorded
+per recording and do not stop later jobs. Successfully validated subject source
+files are removed unless `--keep-source` is provided.
+
+## Longer-term commands
 
 ```text
 neurodata-cnd catalog validate

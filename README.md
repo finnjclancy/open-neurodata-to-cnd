@@ -44,6 +44,11 @@ materially different public-data structures:
 Both produce a strict CND 1.0 neural/stimulus pair, perform numerical CND-to-MNE
 reconciliation, and publish only after a transactional local build succeeds.
 
+The batch workflow has also converted the complete OpenNeuro `ds004574` corpus:
+146 recordings, 31.04 hours, 55,877,200 samples, and 103,426 mapped events. All
+146 releases passed strict CND and CND-to-MNE validation without warnings. See
+the [full-corpus report](docs/CORPUS-DS004574.md).
+
 ```bash
 uv sync --extra dev
 uv run neurodata-to-cnd convert recipes/eegmmidb-s001-r03.json \
@@ -67,6 +72,33 @@ v5 and v7.3 CND outputs. See the validated reports for
 [EEGMMIDB](docs/VERTICAL-SLICE-EEGMMIDB.md) and
 [OpenNeuro ds004574](docs/VERTICAL-SLICE-DS004574.md) for exact checksums,
 transformations, event counts, limitations, and reproduction steps.
+
+## Corpus conversion
+
+The dataset-scale workflow turns a pinned remote inventory into independent,
+resumable recording jobs. Planning downloads metadata only; batch execution
+downloads one recording at a time, publishes it only after strict CND and
+CND-to-MNE validation, and removes that recording's source files by default.
+
+```bash
+uv run neurodata-to-cnd plan corpora/ds004574.json \
+  --output plans/ds004574-v0.2.0.json
+
+uv run neurodata-to-cnd batch plans/ds004574-v0.2.0.json \
+  --pilot --cache-root cache/corpus-v0.2 --output-root outputs
+
+uv run neurodata-to-cnd batch plans/ds004574-v0.2.0.json \
+  --cache-root cache/corpus-v0.2 --output-root outputs
+
+uv run neurodata-to-cnd status outputs/ds004574/0.2.0
+uv run neurodata-to-cnd retry plans/ds004574-v0.2.0.json \
+  --cache-root cache/corpus-v0.2 --output-root outputs
+```
+
+Each recording has its own state and manifest. `index.jsonl` contains one row
+per planned recording, and `summary.json` provides live corpus totals. See the
+[corpus workflow](docs/CORPUS-WORKFLOW.md) for the state, cleanup, retry, and
+publication contracts.
 
 ## Project structure
 

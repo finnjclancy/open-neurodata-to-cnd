@@ -17,7 +17,18 @@ class RecipeError(ValueError):
 class SourceFileSpec:
     path: str
     url: str
-    sha256: str
+    sha256: str | None = None
+    checksum_algorithm: str = "sha256"
+    checksum: str | None = None
+
+    @property
+    def integrity(self) -> tuple[str, str]:
+        """Return the declared checksum algorithm and digest."""
+        if self.sha256 is not None:
+            return "sha256", self.sha256
+        if self.checksum is None:
+            raise RecipeError(f"Source file {self.path!r} has no checksum")
+        return self.checksum_algorithm, self.checksum
 
 
 @dataclass(slots=True, frozen=True)
@@ -223,18 +234,33 @@ def _source_files(source: dict[str, Any]) -> tuple[SourceFileSpec, ...]:
             raise RecipeError(
                 f"source.files[{index}].path must stay inside the snapshot"
             )
-        digest = _text(item, "sha256").lower()
-        if len(digest) != 64 or any(
-            character not in "0123456789abcdef" for character in digest
+        sha256 = _optional_text(item, "sha256")
+        checksum = _optional_text(item, "checksum")
+        algorithm = str(item.get("checksum_algorithm", "sha256")).lower()
+        if sha256 is not None:
+            algorithm = "sha256"
+            checksum = sha256
+        if checksum is None:
+            raise RecipeError(f"source.files[{index}] requires a checksum")
+        checksum = checksum.lower()
+        expected_length = {"sha256": 64, "git": 40}.get(algorithm)
+        if expected_length is None:
+            raise RecipeError(
+                f"source.files[{index}].checksum_algorithm={algorithm!r} is unsupported"
+            )
+        if len(checksum) != expected_length or any(
+            character not in "0123456789abcdef" for character in checksum
         ):
             raise RecipeError(
-                f"source.files[{index}].sha256 must be a hexadecimal SHA-256"
+                f"source.files[{index}] has an invalid {algorithm} checksum"
             )
         files.append(
             SourceFileSpec(
                 path=path.as_posix(),
                 url=_url(item, "url"),
-                sha256=digest,
+                sha256=checksum if algorithm == "sha256" else None,
+                checksum_algorithm=algorithm,
+                checksum=checksum,
             )
         )
     paths = [item.path for item in files]

@@ -25,5 +25,15 @@ def test_example_manifest_matches_the_manifest_schema() -> None:
     )
 
 
+def test_all_corpus_recipes_match_the_corpus_schema() -> None:
+    schema = _load(ROOT / "schemas" / "corpus-recipe.schema.json")
+    validator = Draft202012Validator(schema)
+    for path in sorted((ROOT / "corpora").glob("*.json")):
+        errors = sorted(
+            validator.iter_errors(_load(path)), key=lambda error: error.path
+        )
+        assert not errors, f"{path.name}: {errors}"
+
+
 def _load(path: Path) -> object:
     return json.loads(path.read_text(encoding="utf-8"))

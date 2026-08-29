@@ -1,0 +1,36 @@
+{
+  "$schema": "../schemas/corpus-recipe.schema.json",
+  "corpus_id": "ds004574",
+  "corpus_version": "0.2.0",
+  "status": "active",
+  "template_recipe": "../recipes/ds004574-sub001-oddball.json",
+  "inventory": {
+    "url": "https://data.nemar.org/on004574/v1.0.0/manifest.json",
+    "canonical_sha256": "6ba4dd852ede09e8159a718a1b44911964f6e7782066d47043885f3339a0a5fc"
+  },
+  "source": {
+    "dataset_id": "ds004574",
+    "provider": "NEMAR mirror of OpenNeuro",
+    "version": "1.0.0",
+    "url": "https://openneuro.org/datasets/ds004574/versions/1.0.0",
+    "doi": "10.18112/openneuro.ds004574.v1.0.0"
+  },
+  "layout": {
+    "task": "Oddball",
+    "extension": ".set",
+    "participants_path": "participants.tsv",
+    "shared_paths": [
+      "dataset_description.json",
+      "task-Oddball_events.json"
+    ],
+    "recording_suffixes": [
+      "_eeg.set",
+      "_eeg.fdt",
+      "_channels.tsv",
+      "_coordsystem.json",
+      "_eeg.json",
+      "_electrodes.tsv",
+      "_events.tsv"
+    ]
+  }
+}
