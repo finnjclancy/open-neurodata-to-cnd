@@ -1,9 +1,6 @@
-# Complete ds004574 CND corpus
+# ds004574 corpus
 
-## Outcome
-
-The complete OpenNeuro `ds004574` cross-modal oddball EEG dataset has been
-converted locally using corpus recipe version 0.2.0.
+OpenNeuro `ds004574` oddball EEG, converted locally with corpus recipe 0.2.0. Not a public catalogue release.
 
 | Measure | Result |
 |---|---:|

@@ -1,17 +1,11 @@
-# EEGMMIDB vertical slice
+# EEGMMIDB — one recording
 
-## Outcome
+PhysioNet EEG Motor Movement/Imagery v1.0.0, subject 1, run 3 (`S001R03.edf`). Left/right fist movements and rest. One small public file, used as the first fixture.
 
-The first executable conversion uses one small, versioned public recording:
-
-- **Dataset:** PhysioNet EEG Motor Movement/Imagery Dataset v1.0.0
-- **Source:** subject 1, run 3 (`S001R03.edf`)
-- **Task:** executed left- and right-fist movements separated by rest
 - **Input:** EDF+ with an embedded annotation channel
-- **License:** Open Data Commons Attribution License v1.0
+- **Licence:** ODC-By 1.0
 - **Source size:** 2,596,896 bytes
-- **Source SHA-256:**
-  `3427c8d01bff1380bc9ab9f27a35ece2af5dfadf3e291bbc05eb66e4dadbfe2e`
+- **Source SHA-256:** `3427c8d01bff1380bc9ab9f27a35ece2af5dfadf3e291bbc05eb66e4dadbfe2e`
 
 The exact scientific and technical choices are declared in
 [`recipes/eegmmidb-s001-r03.json`](../recipes/eegmmidb-s001-r03.json).
