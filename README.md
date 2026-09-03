@@ -32,9 +32,9 @@ CND here is a copy. Keep the original BIDS/EDF as the source of truth. A licence
 
 Local, checked, not published as an official CND release:
 
-- PhysioNet EEGMMIDB — one small example (subject 1, run 3). [Notes](docs/VERTICAL-SLICE-EEGMMIDB.md)
-- OpenNeuro `ds004574` — all 146 recordings. [Report](docs/CORPUS-DS004574.md)
-- ERP CORE `nm000132` — all 240 recordings, 40 people × 6 tasks. [Report](docs/CORPUS-NM000132.md)
+- PhysioNet EEGMMIDB — one small example (subject 1, run 3). [Notes](docs/reports/VERTICAL-SLICE-EEGMMIDB.md)
+- OpenNeuro `ds004574` — all 146 recordings. [Report](docs/reports/CORPUS-DS004574.md)
+- ERP CORE `nm000132` — all 240 recordings, 40 people × 6 tasks. [Report](docs/reports/CORPUS-NM000132.md)
 
 No filtering, rereferencing, or resampling. Features are event impulses only. Continuous speech envelopes are not built yet, so naturalistic attention sets like `ds006434` are still a draft recipe.
 
@@ -101,7 +101,8 @@ corpora/     dataset-scale inventories
 converters/  notes on the adapters (code is in src/neurodata_cnd)
 schemas/     recipe and manifest contracts
 outputs/     local CND (gitignored)
-docs/        corpus reports and architecture
+docs/        architecture and how to run a corpus
+docs/reports/  what we actually converted (eegmmidb, ds004574, erp core)
 ```
 
 More: [architecture](docs/ARCHITECTURE.md), [recipes](recipes/README.md), [storage](storage/README.md).
