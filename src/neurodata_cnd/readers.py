@@ -1,4 +1,4 @@
-"""Signal-reader adapters that normalize supported files into MNE Raw."""
+"""Load EDF, BIDS, and similar files as MNE ``Raw``."""
 
 from __future__ import annotations
 

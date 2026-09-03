@@ -1,4 +1,4 @@
-"""Command-line entry point for reproducible CND builds."""
+"""Command-line tools for converting public EEG to CND."""
 
 from __future__ import annotations
 

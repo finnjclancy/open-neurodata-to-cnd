@@ -1,4 +1,4 @@
-"""Stimulus feature extraction from source recording annotations."""
+"""Turn event annotations into stimulus impulse tracks."""
 
 from __future__ import annotations
 

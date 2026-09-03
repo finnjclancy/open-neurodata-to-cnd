@@ -1,4 +1,4 @@
-"""Public neurophysiology data to CND conversion tools."""
+"""Turn public EEG into CND."""
 
 from .recipe import ConversionRecipe, load_recipe
 

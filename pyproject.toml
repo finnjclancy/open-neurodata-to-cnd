@@ -9,6 +9,7 @@ description = "Convert public EEG datasets into CND"
 readme = "README.md"
 requires-python = ">=3.10"
 license = "BSD-3-Clause"
+license-files = ["LICENSE"]
 authors = [{ name = "Finn Clancy" }]
 dependencies = [
   "mne>=1.8",

@@ -1,4 +1,4 @@
-"""Planning and resumable execution for checksum-pinned CND corpora."""
+"""Plan and run a whole dataset, one recording at a time."""
 
 from __future__ import annotations
 
