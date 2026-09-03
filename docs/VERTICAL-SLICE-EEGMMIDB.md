@@ -30,21 +30,19 @@ The run number is semantically important: PhysioNet documents different T1/T2
 meanings for other runs. The mapping is therefore explicit in the recipe and
 is never inferred from the annotation labels alone.
 
-## Transformations deliberately not performed
+## What we did not do
 
-- no filtering;
-- no rereferencing;
-- no resampling;
-- no artifact rejection;
-- no padding or truncation;
-- no epoching;
-- no unit guessing.
+- no filtering or rereferencing
+- no resampling
+- no artifact rejection
+- no padding, truncation, or epoching
+- no unit guessing
 
-MNE reads EDF EEG into volts, and the CND file records volts explicitly.
+MNE reads EDF EEG into volts, and the CND file records volts.
 
 ## Validation result
 
-The local reference build completed all gates without warnings:
+All checks passed:
 
 | Gate | Result |
 |---|---|
@@ -57,13 +55,11 @@ The local reference build completed all gates without warnings:
 | CND-to-MNE neural numerical comparison | Pass |
 | Stimulus impulse exact comparison | Pass |
 
-The canonical scientific-content digest is
+The content hash (arrays only, ignoring MATLAB header timestamps) is
 `bdc411eb498fee53d53158d59c24fecdf345f499ddb0796e0bc1579b149f122b`.
-This digest normalizes array representation and excludes MAT-file header
-timestamps, allowing equivalent MATLAB v5 and v7.3 builds to be compared.
+v5 and v7.3 writes of the same numbers should match.
 
-Large/generated files remain ignored by Git. The local output is written under
-`outputs/eegmmidb/0.1.0/`, with exact output-file checksums in its manifest.
+Output is local, gitignored: `outputs/eegmmidb/0.1.0/`. File checksums are in that folder's manifest.
 
 ## Reproduce
 
@@ -74,31 +70,18 @@ uv run neurodata-to-cnd convert recipes/eegmmidb-s001-r03.json \
   --output-root outputs
 ```
 
-The downloader resumes from a verified cache. Publication is transactional:
-conversion and validation happen in a staging directory, and the versioned
-release becomes visible only after all gates pass.
+Download resumes from a checksum-checked cache. The versioned output folder only appears after conversion and validation pass.
 
-Run all offline format and conversion tests with:
+Offline tests:
 
 ```bash
 uv run pytest -m 'not integration'
 ```
 
-Run the pinned public-data test explicitly with:
+This same public file, on the network:
 
 ```bash
 RUN_PUBLIC_DATA_TESTS=1 uv run pytest tests/test_public_integration.py -vv
 ```
 
-## Format coverage established
-
-- real public EDF+ input;
-- synthetic EDF input;
-- synthetic BrainVision input;
-- synthetic FIF input;
-- MATLAB v5 CND output;
-- MATLAB v7.3/HDF5 CND output.
-
-The next important format is not another synthetic file. It should be one small
-OpenNeuro BIDS/BrainVision recording using `events.tsv`, followed by a
-naturalistic audio dataset with continuous rather than impulse features.
+BIDS/`events.tsv` is already covered by [ds004574](VERTICAL-SLICE-DS004574.md). The remaining gap is continuous speech envelopes, not another impulse ERP set.
