@@ -1,52 +1,45 @@
 # Architecture
 
-This repo turns public EEG into CND. The companion repo, [cnd-mne](https://github.com/finnjclancy/cnd-mne-converter), owns reading, writing, and validating the `.mat` files.
+This repo turns public EEG into CND. The companion repo, [cnd-mne](https://github.com/finnjclancy/cnd-mne-converter), is the thing that reads, writes, and checks the `.mat` files.
 
-The split is on purpose. Recipes and downloads live here. "Is this even CND" lives there.
+Split on purpose: recipes and downloads here. "Is this even CND" there.
 
 ```text
 catalogue → download a pinned source → load signal → apply recipe
     → write CND → strict validate + round trip → local outputs
 ```
 
-Nothing gets published until validation passes. Git never holds the recordings.
+Git never holds the recordings. Nothing is treated as published until those checks pass.
 
-## The pieces
+## Pieces
 
-**Catalogue entry** — what the dataset is, where it lives, licence, size. No conversion decisions.
+**Catalogue entry** — what it is, where to get it, licence, size. No conversion choices.
 
-**Recipe** — the scientific choices for one dataset: which files, which channels, what a trial is, what the stimulus features are, sampling rate, known limitations. If a choice changes the meaning of the experiment, it belongs in the recipe, not as a quiet default in code.
+**Recipe** — the scientific choices: which files, which channels, what a trial is, what the events become, sampling rate, known mess. If a choice changes the meaning of the experiment, it belongs here, not as a quiet default in Python.
 
-**Adapters** — reusable code:
+**Adapters** — reusable code (find/download, load BIDS/EDF/etc, turn events into features, cut trials). Dataset-specific behaviour stays in the recipe, not `if dataset == ...`.
 
-- Source: find and download a snapshot
-- Signal: load BIDS / EDF / BrainVision / etc into MNE
-- Features: turn events or audio into CND stimulus streams
-- Trials: cut the recording into CND trials
+**Manifest** — checksums, recipe version, what was converted, licences, warnings.
 
-Dataset-specific behaviour belongs in the recipe, not in a giant `if dataset == ...` adapter.
+## What a run looks like
 
-**Manifest** — checksums, recipe version, what was converted, licences, warnings. Every local corpus write has one.
+One recording is one job. Jobs can restart independently. GitHub Actions only runs metadata and tiny fixtures, not the bulk downloads.
 
-## How a conversion actually runs
+Right now: EEG only, one source recording = one CND trial. Event impulses from annotations or `events.tsv` work. Speech envelopes do not.
 
-One recording (or one subject/session/task/run group) is one job. Jobs are supposed to be resumable and independent. GitHub Actions only runs metadata and small fixtures, not bulk downloads.
+Actually converted: one EEGMMIDB file, all of `ds004574`, all of ERP CORE `nm000132`. See the main readme.
 
-Current converters only do EEG, and only `recording_run` as the trial unit. Impulse features from annotations or `events.tsv` work. Continuous envelopes do not yet.
-
-What has been through this for real: one EEGMMIDB fixture, all of `ds004574`, all of ERP CORE `nm000132`. See the main readme.
-
-## Checks before something is "done"
+## Before we call it done
 
 - Source version pinned, files present, checksums match
 - Trial cuts and features written down, not inferred
-- New CND passes strict 1.0 validation
+- New CND passes strict 1.0
 - Neural and stimulus trial counts agree
 - CND-MNE can load it and the numbers match
 - Copyrighted media is not stuffed into the release
 
-Publication (object store, DOI, catalogue `published`) is a later step. Local `outputs/` is not that.
+Putting it on object storage with a DOI is a later step. Local `outputs/` is just local.
 
-## Next, if the lab wants speech
+## If the lab wants speech next
 
-The original plan was `ds006434` as the first naturalistic slice: cortical 1 kHz EEG, attended and unattended envelopes, one source trial = one CND trial. That recipe is still a draft because envelope extraction is not implemented. That is the next engineering piece, not another ERP corpus.
+The plan was `ds006434`: 1 kHz EEG, attended and unattended envelopes, one source trial = one CND trial. That recipe is still a draft because envelope extraction is not written. That is the next engineering piece, not another ERP set.

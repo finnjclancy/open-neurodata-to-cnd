@@ -13,4 +13,4 @@ neurodata-to-cnd retry <plan>
 
 Not built yet: a separate `publish` command, object-store upload, or `source inspect`.
 
-Jobs are meant to resume. If the inputs have not changed, a completed recording is left alone. Do not guess scientific meaning in the workflow layer — stop and fix the recipe.
+Jobs are meant to resume. If the inputs have not changed, a completed recording is left alone. Do not guess scientific meaning here — stop and fix the recipe.

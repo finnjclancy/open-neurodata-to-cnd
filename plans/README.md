@@ -10,4 +10,4 @@ uv run neurodata-to-cnd plan corpora/nm000132.json \
   --output plans/nm000132-v0.3.0.json
 ```
 
-Only regenerate a plan when you mean to start a new corpus version. The planner checks a canonical inventory digest (signed URLs stripped). Each file is still checked against its SHA-256 or git blob when downloaded.
+Only regenerate a plan when you mean to start a new corpus version. The planner hashes the inventory with signed URLs stripped. Each file is still checked against its SHA-256 or git blob when downloaded.
