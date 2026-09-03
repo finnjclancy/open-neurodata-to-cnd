@@ -26,22 +26,18 @@ one-sample binary features:
 | `go_arrow_onset` | `S  2` | 236 | Directional GO arrow |
 | `response_onset` | `S  3` | 236 | Participant response marker |
 
-The source `channels.tsv` records all types as `n/a`, although the EEG sidecar
-declares 63 EEG channels and all 63 named channels have electrode coordinates.
-The recipe therefore contains a reviewed, evidence-bearing `all_eeg` correction.
-The reader rejects that correction if the evidence field is absent; it is not a
-global guess.
+The source `channels.tsv` lists every channel type as `n/a`, even though the EEG sidecar says 63 EEG channels and all 63 have coordinates. The recipe therefore has an explicit `all_eeg` correction, with the evidence attached. The reader refuses that correction if the evidence field is missing.
 
-## Transformations deliberately not performed
+## What we did not do
 
-- no filtering or rereferencing;
-- no resampling;
-- no artifact rejection;
-- no epoching, padding, or truncation;
-- no inferred or fuzzy event-name matching;
-- no embedded stimulus media.
+- no filtering or rereferencing
+- no resampling
+- no artifact rejection
+- no epoching, padding, or truncation
+- no fuzzy event-name matching
+- no embedded stimulus media
 
-EEGLAB values loaded by MNE are represented in volts, and CND records volts.
+EEGLAB values loaded by MNE are in volts, and the CND we wrote records volts.
 
 ## Validation result
 
@@ -55,10 +51,9 @@ EEGLAB values loaded by MNE are represented in volts, and CND records volts.
 | CND-to-MNE neural numerical comparison | Pass |
 | Stimulus impulse exact comparison | Pass |
 
-The canonical scientific-content digest is
+The content hash (arrays only, ignoring MATLAB header timestamps) is
 `e5b901ad9bf0e5b20c1f51b3617d2664c8925498a2c9870a5f7d110ac960b399`.
-The local MATLAB v5 outputs are approximately 164 MiB for neural data and 12
-KiB for stimulus features. Generated data remain outside Git.
+Local MATLAB v5 output is about 164 MiB of neural data and 12 KiB of stimulus features. Not in git.
 
 ## Reproduce
 
@@ -69,8 +64,7 @@ uv run neurodata-to-cnd convert recipes/ds004574-sub001-oddball.json \
   --output-root outputs
 ```
 
-The public-data regression test is deliberately opt-in because it downloads
-approximately 105 MB and creates a roughly 164 MiB CND output:
+The public pytest is opt-in because it downloads about 105 MB and writes about 164 MiB of CND:
 
 ```bash
 RUN_LARGE_PUBLIC_DATA_TESTS=1 \
@@ -79,5 +73,4 @@ RUN_LARGE_PUBLIC_DATA_TESTS=1 \
 
 ## Scope
 
-This is the one-participant recipe. The full 146-recording conversion is in [CORPUS-DS004574.md](CORPUS-DS004574.md). The public pytest is opt-in because it downloads ~105 MB.
-
+This is the one-participant recipe. The full 146-recording conversion is in [CORPUS-DS004574.md](CORPUS-DS004574.md).

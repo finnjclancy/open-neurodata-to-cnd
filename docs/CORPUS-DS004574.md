@@ -63,14 +63,13 @@ There were zero strict-CND warnings, zero round-trip warnings, and zero invalid
 manifests. A final audit independently rehashed all 292 generated files and
 verified 23,539,685,522 bytes against the checksums in their manifests.
 
-The corpus-level canonical scientific-content digest is:
+The content hash of the whole corpus (each recording's identity plus its array hash) is:
 
 ```text
 d13cd98fa4f56835a7d1d7665ccaacaf66da7d7fa0316b232bddcd57738c6831
 ```
 
-This digest hashes each ordered recording identity and its representation-neutral
-scientific-content digest. It does not depend on MATLAB header timestamps.
+This hashes each recording identity plus its array-only content hash. MATLAB header timestamps do not affect it.
 
 ## Resilience demonstrated
 

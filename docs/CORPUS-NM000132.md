@@ -70,7 +70,7 @@ There were zero strict-CND warnings, zero round-trip warnings, and 240 unique
 release IDs. A separate final audit independently rehashed all 480 generated
 MATLAB files and verified all 12,908,616,770 bytes against their manifests.
 
-The corpus-level canonical scientific-content digest is:
+The content hash of the whole corpus (each recording's identity plus its array hash) is:
 
 ```text
 87002049c5850116f3fa064201f37ae8a8d0fdec79c31a22e91fab46632c03c6
