@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "open-neurodata-to-cnd"
 version = "0.1.0.dev0"
-description = "Reproducible conversion of public structured neurophysiology data to CND"
+description = "Convert public EEG datasets into CND"
 readme = "README.md"
 requires-python = ">=3.10"
 license = "BSD-3-Clause"

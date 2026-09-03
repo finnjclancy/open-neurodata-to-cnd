@@ -1,9 +1,6 @@
-# Complete ERP CORE CND corpus
+# ERP CORE corpus
 
-## Outcome
-
-The complete NEMAR `nm000132` ERP CORE v1.1.1 release has been converted
-locally using corpus recipe version 0.3.0.
+NEMAR `nm000132` ERP CORE v1.1.1, converted locally with corpus recipe 0.3.0. Not a public catalogue release.
 
 | Measure | Result |
 |---|---:|

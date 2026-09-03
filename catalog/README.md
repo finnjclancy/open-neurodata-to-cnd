@@ -1,23 +1,22 @@
-# Dataset catalogue
+# Catalogue
 
-[`datasets.json`](datasets.json) is the machine-readable conversion queue. The main README contains the broader researched directory; entries move into the JSON catalogue when their identity, access status, license, scale, and priority have been reviewed.
+[`datasets.json`](datasets.json) is the conversion queue. Add a dataset there once you know the id, access, licence, size, and whether it is worth converting.
 
-## Status meanings
+## Status
 
-- `candidate`: suitable for recipe development.
-- `pilot-proposed`: recommended for the first vertical conversion slice.
-- `license-blocked`: downloadable, but redistribution or derivative rights are unresolved.
-- `stimulus-rights-review`: neural data are available but stimulus rights need separate review.
-- `awaiting-meg-support`: conversion should wait for validated MEG support in CND-MNE.
-- `converted`: a candidate release exists but has not passed every publication gate.
-- `published`: an immutable validated CND release and manifest are available.
-- `stale`: the upstream dataset changed after conversion.
+- `candidate` — fine to write a recipe
+- `pilot-proposed` — suggested first slice for a new kind of data
+- `license-blocked` — can download, should not redistribute
+- `stimulus-rights-review` — EEG is ok, the movie/book/audio may not be
+- `awaiting-meg-support` — wait until CND-MNE can do MEG
+- `converted` — local CND exists, not a public release
+- `published` — immutable release + manifest
+- `stale` — upstream changed after we converted
 
-## Updating the catalogue
+## Updating it
 
-1. Verify the canonical dataset identifier and URL.
-2. Pin or record the source version.
-3. Verify neural and stimulus licenses independently.
-4. De-duplicate mirrors and derivatives.
-5. Add the entry with a unique contiguous priority.
-6. Run `python scripts/validate_catalog.py`.
+Pin the source version. Check neural and stimulus licences separately. Do not list the same dataset twice via a mirror. Then:
+
+```bash
+python scripts/validate_catalog.py
+```

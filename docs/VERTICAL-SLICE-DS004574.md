@@ -1,17 +1,11 @@
-# OpenNeuro ds004574 vertical slice
+# ds004574 — one recording
 
-## Outcome
+OpenNeuro `ds004574` v1.0.0, subject 001, oddball. This is the fixture that was used before converting the whole 146-recording corpus.
 
-The second executable conversion deliberately differs from the first: it uses
-a multi-file OpenNeuro BIDS recording rather than a single annotated EDF file.
-
-- **Dataset:** Cross-modal oddball task, OpenNeuro `ds004574` v1.0.0
-- **Source:** subject 001, task Oddball
-- **Input:** EEGLAB `.set`/`.fdt` plus seven BIDS metadata and event files
-- **License:** CC0
+- **Input:** EEGLAB `.set`/`.fdt` plus seven BIDS metadata/event files
+- **Licence:** CC0
 - **Pinned source size:** 105,265,313 bytes
-- **Source snapshot SHA-256:**
-  `21fb996b5f6d6b2bd65d196ad90610c2a6771b920397f7c3cf547b009b1710d4`
+- **Source snapshot SHA-256:** `21fb996b5f6d6b2bd65d196ad90610c2a6771b920397f7c3cf547b009b1710d4`
 
 Every constituent file has its own SHA-256 in
 [`recipes/ds004574-sub001-oddball.json`](../recipes/ds004574-sub001-oddball.json).
@@ -83,10 +77,7 @@ RUN_LARGE_PUBLIC_DATA_TESTS=1 \
   uv run pytest tests/test_public_integration.py::test_ds004574_public_bids_vertical_slice -vv
 ```
 
-## Scope and next step
+## Scope
 
-This recipe proves the reusable BIDS/EEGLAB/events path for one participant; it
-does not claim that all 146 participants have been converted or audited. The
-next structural milestone is continuous stimulus features (for example an audio
-envelope aligned to naturalistic EEG), followed by batch planning and resumable
-subject-level execution using the same immutable recipe and manifest contracts.
+This is the one-participant recipe. The full 146-recording conversion is in [CORPUS-DS004574.md](CORPUS-DS004574.md). The public pytest is opt-in because it downloads ~105 MB.
+

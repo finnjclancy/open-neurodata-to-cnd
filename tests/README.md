@@ -1,29 +1,23 @@
 # Tests
 
-The test suite will be split into four layers:
+Four layers, in theory:
 
-1. **Metadata tests:** catalogue, recipe, manifest, and schema validation; no data downloads.
-2. **Unit tests:** signal, event, feature, synchronization, and trial helpers using synthetic arrays.
-3. **Fixture tests:** tiny legally redistributable source/CND samples covering each adapter family.
-4. **Integration tests:** optional network and object-storage tests, excluded from normal CI.
+1. Metadata — catalogue, recipes, schemas, no downloads
+2. Unit — synthetic arrays
+3. Fixtures — tiny legal samples
+4. Integration — optional network tests, not in normal CI
 
-Bulk corpus conversion must never run in GitHub Actions. Full validation reports belong with the object-store release manifest.
+Do not run bulk corpus conversion in GitHub Actions.
 
-The current offline suite covers annotation and BIDS-event semantics,
-multi-file snapshot integrity, evidence-bearing channel corrections,
-missing-event failures, transactional publication, immutable outputs, canonical
-content hashes, EDF, BrainVision, FIF, and CND MATLAB v5/v7.3.
+Right now the offline suite covers event mapping, snapshot integrity, channel corrections, transactional writes, EDF / BrainVision / FIF, and MATLAB v5/v7.3. The full pipeline tests need the private CND-MNE extra.
 
-The small opt-in public integration test downloads the pinned EEGMMIDB EDF:
+Optional public downloads:
 
 ```bash
 RUN_PUBLIC_DATA_TESTS=1 uv run pytest tests/test_public_integration.py -vv
-```
 
-The separate large test downloads the 105 MB OpenNeuro BIDS/EEGLAB snapshot and
-creates an approximately 164 MiB CND derivative:
-
-```bash
 RUN_LARGE_PUBLIC_DATA_TESTS=1 \
   uv run pytest tests/test_public_integration.py::test_ds004574_public_bids_vertical_slice -vv
 ```
+
+The large one pulls a 105 MB OpenNeuro snapshot and writes ~164 MiB of CND.

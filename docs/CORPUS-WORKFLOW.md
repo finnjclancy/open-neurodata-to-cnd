@@ -1,95 +1,40 @@
-# Resumable corpus conversion
+# Corpus conversion
 
-## Contracts
+Three files, in order:
 
-The corpus layer separates three concerns:
+1. **Corpus recipe** (`corpora/*.json`) — which remote inventory, which recordings, which experiment recipe(s)
+2. **Plan** (`plans/*.json`) — one checksum-pinned job per recording. Generated, metadata only
+3. **Batch** — download one recording, convert, validate, write to `outputs/`
 
-1. A **corpus recipe** identifies one immutable remote inventory and defines how
-   recordings are discovered. It may declare one experiment or multiple tasks
-   with separate reviewed conversion templates.
-2. A generated **plan** expands the inventory into independent, checksum-pinned
-   jobs while downloading only small metadata files.
-3. **Batch execution** instantiates the reviewed experiment recipe for each job,
-   validates the result, and maintains a corpus index.
-
-Experiment meaning remains in the conversion recipe. The corpus layer changes
-subject-relative paths and provenance; it does not infer new event semantics.
-
-Multi-task plans use recording identities such as `sub-001_task-MMN` and pin
-the template recipe digest separately for every job. This prevents a change to
-one task's event semantics from silently affecting another task.
-
-## Output layout
+The corpus layer does not invent event meanings. That stays in the experiment recipe. Multi-task jobs look like `sub-001_task-MMN` and pin their own recipe digest, so editing flankers does not silently change MMN.
 
 ```text
 outputs/<corpus-id>/<corpus-version>/
-├── recordings/
-│   └── sub-NNN/
-│       ├── dataCND/
-│       │   ├── dataSubNNN.mat
-│       │   └── dataStim.mat
-│       └── manifest.json
-├── state/
-│   └── sub-NNN.json
+├── recordings/sub-NNN/dataCND/   # dataSub*.mat + dataStim.mat
+├── recordings/sub-NNN/manifest.json
+├── state/sub-NNN.json
 ├── index.jsonl
 └── summary.json
 ```
 
-Each recording is built in a staging directory. Its final directory appears
-only after source reconciliation, strict CND validation, MATLAB read-back,
-CND-to-MNE numerical comparison, and exact stimulus-feature comparison pass.
+A recording directory only appears after source checksums, strict CND validation, MATLAB read-back, and CND-to-MNE numerical checks all pass.
 
-## State and restart behavior
+## Restart
 
-States are `pending`, `running`, `complete`, or `failed`. A process interruption
-may leave a job marked `running`; the next batch invocation safely reruns it.
-If a validated manifest exists, it is reconciled into `complete` state and the
-job is skipped. A state that claims completion while its manifest is absent is
-treated as corruption rather than silently rerun.
+States: `pending`, `running`, `complete`, `failed`. If a process dies mid-job, the next `batch` reruns it. If a valid manifest is already there, the job is skipped. `retry` only picks up failures. One failure does not stop the rest.
 
-`retry` selects failed jobs only. Attempts and full local tracebacks are retained
-in state files for diagnosis. A failed job does not prevent subsequent jobs from
-running.
+## Source files
 
-## Source lifecycle
+Planning only downloads inventory + small BIDS metadata. Conversion downloads one recording, checks it, then deletes the bulky source unless you pass `--keep-source`. Failed jobs keep verified cache files so retry does not fetch them again.
 
-Planning retrieves only the inventory, `participants.tsv`, and recording-level
-EEG JSON sidecars. During conversion, one job's declared BIDS snapshot is
-downloaded and verified. After successful publication, subject-specific source
-files are deleted from the cache; tiny shared BIDS metadata remains for reuse.
+## Pilots
 
-Failed and interrupted jobs retain any fully verified cached files so retry does
-not redownload them. Partial downloads use temporary names and are removed by
-the atomic downloader.
+ds004574's pilot is picked from metadata: every channel count, both groups, shortest and longest recording. It is a structural smoke test, not a scientific sample. For ERP CORE, the pilot includes at least one recording from every task.
 
-Use `--keep-source` only when an audit or repeated development run requires the
-original files to remain cached.
+## Events and channels
 
-## Pilot policy
+A feature can match one `source_value` or a reviewed `source_values` list (e.g. several P3 letter codes → `target_onset`). The list is stored in the recipe.
 
-The ds004574 pilot is selected deterministically from metadata and covers:
+`sample_index_origin` defaults to 0. ERP CORE needed `1`. Timing is still checked after that shift.
 
-- every declared channel count;
-- both participant groups;
-- the shortest recording;
-- the longest recording.
-
-This is a structural gate before full-corpus execution, not a scientific sample.
-
-For multi-task corpora, the pilot first selects at least one recording from
-every task, then adds channel-layout, group, and duration extremes as needed.
-
-## Dataset-declared timing and channels
-
-The BIDS event adapter supports either one exact `source_value` or a reviewed
-`source_values` set for a single CND impulse feature. Grouping is useful for
-scientifically meaningful categories such as P3 targets across multiple letter
-codes; the complete list is retained in the recipe and manifest.
-
-`sample_index_origin` is zero by default. A recipe may explicitly set it to one
-when a source dataset stores one-based sample indices. Onset reconciliation is
-still enforced after applying the declared origin.
-
-The `eeg_only` channel policy selects channels already typed as EEG by the
-source metadata and excludes auxiliary channels such as EOG. It does not
-relabel channels.
+`eeg_only` keeps channels already typed as EEG and drops EOG. It does not relabel anything.
