@@ -1,4 +1,4 @@
-"""Typed access to reviewed JSON conversion recipes."""
+"""Load conversion recipes from JSON."""
 
 from __future__ import annotations
 
@@ -72,7 +72,7 @@ class ConversionRecipe:
 
 
 def load_recipe(path: str | Path) -> ConversionRecipe:
-    """Load and perform executable-contract checks on one JSON recipe."""
+    """Load one JSON recipe and check that required fields are present."""
     recipe_path = Path(path).expanduser().resolve()
     with recipe_path.open(encoding="utf-8") as handle:
         payload = json.load(handle)

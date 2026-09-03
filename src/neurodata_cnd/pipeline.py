@@ -1,4 +1,4 @@
-"""End-to-end conversion, validation, and provenance manifest generation."""
+"""Convert one recording, check it, write a manifest."""
 
 from __future__ import annotations
 

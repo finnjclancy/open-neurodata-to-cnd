@@ -1,4 +1,4 @@
-"""Pinned, checksum-verified source acquisition."""
+"""Download a pinned source file and check its checksum."""
 
 from __future__ import annotations
 
