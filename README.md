@@ -4,29 +4,11 @@ Turn publicly shared EEG into **CND**, the MATLAB layout the Di Liberto lab alre
 
 [CND-MNE](https://github.com/finnjclancy/cnd-mne-converter) reads and writes those MATLAB files. This repo is the pipeline that *creates* CND from other public formats (OpenNeuro, PhysioNet, and similar).
 
-## Why this exists
+A lot of EEG is already public, usually as **BIDS** or **EDF**. The [Di Liberto lab](https://www.diliberg.net/) stores its own work as CND. Collections that are already CND are on the [CNSP dataset catalogue](https://cnsp-resources.readthedocs.io/en/latest/datasetsPage.html).
 
-A lot of EEG (scalp brain recordings) is already public. It usually arrives as **BIDS** (a folder of recordings plus `events.tsv`) or **EDF** (one recording file). The [Di Liberto lab](https://www.diliberg.net/) stores its own work as CND: `dataSubN.mat` for the brain signal and `dataStim.mat` for what was happening at the same time. Collections that are already CND are on the [CNSP dataset catalogue](https://cnsp-resources.readthedocs.io/en/latest/datasetsPage.html).
-
-If those public datasets are also in CND, you can load them with the same Python tools, keep the event timing, and keep a written record of every conversion choice.
-
-This project:
-
-1. Downloads one pinned public file (checksum checked)
-2. Follows a **recipe** — a JSON file that says which channels to keep, what a trial is, and which events become stimulus tracks
-3. Writes CND
-4. Checks the result with CND-MNE
-
-Git only stores recipes and checksums. The recordings stay in `cache/` and `outputs/` on your machine.
+This project downloads one pinned public file, follows a **recipe** (which channels, what a trial is, which events become stimulus tracks), writes CND, and checks it with CND-MNE. Git only stores recipes and checksums. Recordings stay in `cache/` and `outputs/` on your machine.
 
 CND here is a copy. Keep the original BIDS/EDF as the source of truth. A licence on the EEG does not mean you can republish the movie, audiobook, or novel people were watching or hearing.
-
-## Words used here
-
-- **Recipe** — the scientific decisions for one dataset, in JSON. Not just CLI flags.
-- **Trial** — in the conversions so far, one source recording = one CND trial (the whole run, not cut into ERP epochs).
-- **Impulse** — a one-sample spike at a button press or cue.
-- **Speech envelope** — a smooth track of how loud the audio was. Not implemented yet.
 
 ## What has actually been converted
 
@@ -38,11 +20,11 @@ Local, checked, not published as an official CND release:
 
 No filtering, rereferencing, or resampling. Features are event impulses only. Continuous speech envelopes are not built yet, so naturalistic attention sets like `ds006434` are still a draft recipe.
 
-Other candidates: [catalog/datasets.json](catalog/datasets.json). Do not reconvert Lalor Natural Speech (`ds004408`) or the KUL attention sets that already exist as CND on the [catalogue](https://cnsp-resources.readthedocs.io/en/latest/datasetsPage.html).
+Other candidates: [catalog/datasets.json](catalog/datasets.json) (`candidate`, `converted`, `license-blocked`, `stimulus-rights-review`, …). After editing it: `python scripts/validate_catalog.py`. Do not reconvert Lalor Natural Speech (`ds004408`) or the KUL attention sets that already exist as CND on the [catalogue](https://cnsp-resources.readthedocs.io/en/latest/datasetsPage.html).
 
-## Download and install
+## Install
 
-You need [git](https://git-scm.com/), [uv](https://docs.astral.sh/uv/), Python 3.10 or newer, and access to the private [cnd-mne](https://github.com/finnjclancy/cnd-mne-converter) repo (this project installs it as a dependency).
+You need [git](https://git-scm.com/), [uv](https://docs.astral.sh/uv/), Python 3.10 or newer, and access to the private [cnd-mne](https://github.com/finnjclancy/cnd-mne-converter) repo.
 
 ```bash
 git clone https://github.com/finnjclancy/open-neurodata-to-cnd.git
@@ -76,7 +58,7 @@ uv run neurodata-to-cnd convert recipes/ds004574-sub001-oddball.json \
   --output-root outputs
 ```
 
-Pass `--overwrite` if the output folder already exists. Pass `--source /path/to/file` if you already have the original recording and do not want to download it again.
+Pass `--overwrite` if the output folder already exists. Pass `--source /path/to/file` if you already have the original recording.
 
 ## Convert a whole dataset
 
@@ -90,19 +72,31 @@ uv run neurodata-to-cnd retry plans/ds004574-v0.2.0.json \
   --cache-root cache/corpus-v0.2 --output-root outputs
 ```
 
-Same pattern for `corpora/nm000132.json`. Each recording has its own state. A failure does not redo the ones that already passed. More: [docs/CORPUS-WORKFLOW.md](docs/CORPUS-WORKFLOW.md).
+Same pattern for `corpora/nm000132.json`. `batch` runs one recording at a time. Finished jobs are skipped. A failure is recorded and the rest keep going. `retry` only picks up failures. Source files are deleted after a successful validate unless you pass `--keep-source`. Only regenerate a plan when you mean to start a new corpus version.
+
+```text
+outputs/<corpus-id>/<corpus-version>/
+├── recordings/sub-NNN/dataCND/
+├── recordings/sub-NNN/manifest.json
+├── state/sub-NNN.json
+├── index.jsonl
+└── summary.json
+```
+
+A recording folder only appears after checksums, strict CND, MATLAB read-back, and CND-to-MNE number checks all pass.
+
+Recipe gotchas: a feature can match one `source_value` or a list (`source_values`); `sample_index_origin` defaults to 0 (ERP CORE needed `1`); `eeg_only` keeps EEG-typed channels and drops EOG, it does not relabel; ds004574 `--pilot` is a smoke test from metadata, not a scientific sample.
 
 ## Layout
 
 ```text
-catalog/     what datasets exist and their licences
-recipes/     conversion decisions (channels, events, trial cuts)
-corpora/     dataset-scale inventories
-converters/  notes on the adapters (code is in src/neurodata_cnd)
-schemas/     recipe and manifest contracts
-outputs/     local CND (gitignored)
-docs/        architecture and how to run a corpus
-docs/reports/  what we actually converted (eegmmidb, ds004574, erp core)
+catalog/        what datasets exist and their licences
+recipes/        conversion decisions (channels, events, trial cuts)
+corpora/        dataset-scale inventories
+src/            adapters (download, load, events, trials)
+schemas/        recipe and manifest contracts
+outputs/        local CND (gitignored)
+docs/reports/   what we actually converted
 ```
 
-More: [architecture](docs/ARCHITECTURE.md), [recipes](recipes/README.md), [storage](storage/README.md).
+CND writing and strict validation go through CND-MNE. There is no second writer. Git never holds the recordings.

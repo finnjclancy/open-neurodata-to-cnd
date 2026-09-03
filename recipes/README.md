@@ -1,8 +1,6 @@
 # Recipes
 
-A recipe is the conversion decisions for one dataset, not a pile of CLI flags. Someone should be able to tell what a CND trial is, which channels were kept, and how events were mapped without reading the Python.
-
-Typical contents: source snapshot, channel/unit policy, trial cuts, stimulus features, trigger delays, sampling rate, exclusions, output layout, validation, licence notes.
+A recipe is the conversion decisions for one dataset. Someone should be able to tell what a CND trial is, which channels were kept, and how events were mapped without reading the Python.
 
 Working examples:
 
