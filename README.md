@@ -6,7 +6,7 @@ Turn publicly shared EEG into **CND**, the MATLAB layout the Di Liberto lab alre
 
 ## Why this exists
 
-A lot of EEG (scalp brain recordings) is already public. It usually arrives as **BIDS** (a folder of recordings plus `events.tsv`) or **EDF** (one recording file). The lab's own work is CND: `dataSubN.mat` for the brain signal and `dataStim.mat` for what was happening at the same time.
+A lot of EEG (scalp brain recordings) is already public. It usually arrives as **BIDS** (a folder of recordings plus `events.tsv`) or **EDF** (one recording file). The [Di Liberto lab](https://www.diliberg.net/) stores its own work as CND: `dataSubN.mat` for the brain signal and `dataStim.mat` for what was happening at the same time. Collections that are already CND are on the [CNSP dataset catalogue](https://cnsp-resources.readthedocs.io/en/latest/datasetsPage.html).
 
 If those public datasets are also in CND, you can load them with the same Python tools, keep the event timing, and keep a written record of every conversion choice.
 
@@ -38,7 +38,7 @@ Local, checked, not published as an official CND release:
 
 No filtering, rereferencing, or resampling. Features are event impulses only. Continuous speech envelopes are not built yet, so naturalistic attention sets like `ds006434` are still a draft recipe.
 
-Other candidates: [catalog/datasets.json](catalog/datasets.json). Do not reconvert Lalor Natural Speech (`ds004408`) or the KUL attention sets that already exist as CND.
+Other candidates: [catalog/datasets.json](catalog/datasets.json). Do not reconvert Lalor Natural Speech (`ds004408`) or the KUL attention sets that already exist as CND on the [catalogue](https://cnsp-resources.readthedocs.io/en/latest/datasetsPage.html).
 
 ## Download and install
 
