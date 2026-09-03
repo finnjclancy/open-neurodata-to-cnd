@@ -1,8 +1,8 @@
 # Storage
 
-Do not commit raw EEG/MEG or generated CND corpora to git. Git gets code, recipes, manifests, checksums, and tiny fixtures. Everything else belongs on disk or in object storage.
+Do not commit raw EEG/MEG or generated CND to git. Git gets code, recipes, manifests, checksums, and tiny fixtures. Everything else belongs on disk or in object storage.
 
-There is no live S3/R2 publisher yet. Local `outputs/<dataset>/<version>/` is the current "release". The layout below is what a later publish step should look like.
+There is no live S3/R2 publisher yet. Local `outputs/<dataset>/<version>/` is the current "release". If we publish later, something like:
 
 ```text
 s3://<bucket>/

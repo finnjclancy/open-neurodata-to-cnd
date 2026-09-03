@@ -1,6 +1,6 @@
 # Catalogue
 
-[`datasets.json`](datasets.json) is the conversion queue. Add a dataset there once you know the id, access, licence, size, and whether it is worth converting.
+[`datasets.json`](datasets.json) is the conversion queue. Add a dataset once you know the id, how to get it, the licence, roughly how big it is, and whether it is worth converting.
 
 ## Status
 
@@ -10,7 +10,7 @@
 - `stimulus-rights-review` — EEG is ok, the movie/book/audio may not be
 - `awaiting-meg-support` — wait until CND-MNE can do MEG
 - `converted` — local CND exists, not a public release
-- `published` — immutable release + manifest
+- `published` — frozen release + manifest
 - `stale` — upstream changed after we converted
 
 ## Updating it

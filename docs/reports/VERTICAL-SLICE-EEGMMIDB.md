@@ -1,34 +1,27 @@
 # EEGMMIDB — one recording
 
-PhysioNet EEG Motor Movement/Imagery v1.0.0, subject 1, run 3 (`S001R03.edf`). Left/right fist movements and rest. One small public file, used as the first fixture.
+PhysioNet EEG Motor Movement/Imagery v1.0.0, subject 1, run 3 (`S001R03.edf`). Left/right fist movements and rest. First public file we converted, because it is small.
 
-- **Input:** EDF+ with an embedded annotation channel
+- **Input:** EDF+ with an annotation channel
 - **Licence:** ODC-By 1.0
-- **Source size:** 2,596,896 bytes
-- **Source SHA-256:** `3427c8d01bff1380bc9ab9f27a35ece2af5dfadf3e291bbc05eb66e4dadbfe2e`
+- **Size:** 2,596,896 bytes
+- **SHA-256:** `3427c8d01bff1380bc9ab9f27a35ece2af5dfadf3e291bbc05eb66e4dadbfe2e`
 
-The exact scientific and technical choices are declared in
-[`recipes/eegmmidb-s001-r03.json`](../../recipes/eegmmidb-s001-r03.json).
+Choices are in [`recipes/eegmmidb-s001-r03.json`](../../recipes/eegmmidb-s001-r03.json).
 
-## CND representation
+## What CND looks like
 
-The complete 125-second recording remains one CND trial. No artificial epochs
-or joins are introduced. The neural matrix contains 20,000 samples by 64 EEG
-channels at 160 Hz. MNE's EEGBCI label standardization and the standard 10-05
-montage provide explicit channel labels and positions.
+The whole 125 s run is one trial. 20,000 samples × 64 EEG channels at 160 Hz. Channel names and positions come from MNE's EEGBCI labels and the 10-05 montage.
 
-The EDF+ annotations become three one-sample binary stimulus features at the
-same 160 Hz clock:
+EDF annotations become three one-sample spikes on that same 160 Hz clock:
 
-| CND feature | EDF annotation | Event count | Meaning in run 3 |
+| CND feature | EDF annotation | Count | Meaning in run 3 |
 |---|---:|---:|---|
-| `rest_onset` | `T0` | 15 | Start of a rest period |
-| `left_fist_execution_onset` | `T1` | 8 | Left-fist execution cue |
-| `right_fist_execution_onset` | `T2` | 7 | Right-fist execution cue |
+| `rest_onset` | `T0` | 15 | rest starts |
+| `left_fist_execution_onset` | `T1` | 8 | left-fist cue |
+| `right_fist_execution_onset` | `T2` | 7 | right-fist cue |
 
-The run number is semantically important: PhysioNet documents different T1/T2
-meanings for other runs. The mapping is therefore explicit in the recipe and
-is never inferred from the annotation labels alone.
+T1/T2 mean different things on other PhysioNet runs, so the recipe names them. We do not guess from the letters alone.
 
 ## What we did not do
 
@@ -38,28 +31,16 @@ is never inferred from the annotation labels alone.
 - no padding, truncation, or epoching
 - no unit guessing
 
-MNE reads EDF EEG into volts, and the CND file records volts.
+MNE reads EDF EEG as volts. The CND file says volts.
 
-## Validation result
+## Checks
 
-All checks passed:
+All passed: source checksum, 160 Hz, annotations land on the right samples, strict CND 1.0 before and after write, MATLAB round trip, numbers match in CND-MNE, impulses match.
 
-| Gate | Result |
-|---|---|
-| Official source checksum | Pass |
-| Reviewed sampling frequency, 160 Hz | Pass |
-| Annotation-to-sample quantization | Pass; maximum error 0 samples |
-| Strict CND 1.0 validation before writing | Pass |
-| MATLAB write/read | Pass |
-| Strict CND 1.0 validation after reading | Pass |
-| CND-to-MNE neural numerical comparison | Pass |
-| Stimulus impulse exact comparison | Pass |
+Content hash (the arrays, not MATLAB header timestamps):
+`bdc411eb498fee53d53158d59c24fecdf345f499ddb0796e0bc1579b149f122b`
 
-The content hash (arrays only, ignoring MATLAB header timestamps) is
-`bdc411eb498fee53d53158d59c24fecdf345f499ddb0796e0bc1579b149f122b`.
-v5 and v7.3 writes of the same numbers should match.
-
-Output is local, gitignored: `outputs/eegmmidb/0.1.0/`. File checksums are in that folder's manifest.
+Output is local: `outputs/eegmmidb/0.1.0/`. Checksums are in that folder's manifest.
 
 ## Reproduce
 
@@ -70,18 +51,12 @@ uv run neurodata-to-cnd convert recipes/eegmmidb-s001-r03.json \
   --output-root outputs
 ```
 
-Download resumes from a checksum-checked cache. The versioned output folder only appears after conversion and validation pass.
+Offline tests: `uv run pytest -m 'not integration'`
 
-Offline tests:
-
-```bash
-uv run pytest -m 'not integration'
-```
-
-This same public file, on the network:
+Same public file, on the network:
 
 ```bash
 RUN_PUBLIC_DATA_TESTS=1 uv run pytest tests/test_public_integration.py -vv
 ```
 
-BIDS/`events.tsv` is already covered by [ds004574](VERTICAL-SLICE-DS004574.md). The remaining gap is continuous speech envelopes, not another impulse ERP set.
+BIDS / `events.tsv` is [ds004574](VERTICAL-SLICE-DS004574.md). Still missing: speech envelopes.

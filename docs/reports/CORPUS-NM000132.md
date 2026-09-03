@@ -1,87 +1,57 @@
 # ERP CORE corpus
 
-NEMAR `nm000132` ERP CORE v1.1.1, converted locally with corpus recipe 0.3.0. Not a public catalogue release.
+NEMAR `nm000132` ERP CORE v1.1.1, converted locally with corpus recipe 0.3.0. Not a public CND release.
 
-| Measure | Result |
+| | |
 |---|---:|
-| Participants | 40 |
-| Paradigms per participant | 6 |
-| Planned recordings | 240 |
-| Completed recordings | 240 |
-| Failed recordings | 0 |
-| EEG channels per recording | 30 |
-| Total samples | 139,146,240 |
-| Total duration | 135,885 seconds (37.75 hours) |
-| Reviewed event impulses | 153,677 |
-| Source bytes represented by jobs | 18,719,829,517 |
-| CND output bytes | 12,908,616,770 (12.02 GiB) |
-| CND MATLAB files | 480 |
+| people | 40 |
+| tasks each | 6 |
+| planned | 240 |
+| done | 240 |
+| failed | 0 |
+| EEG channels | 30 |
+| samples | 139,146,240 |
+| duration | 37.75 hours |
+| event impulses | 153,677 |
+| source bytes | 18,719,829,517 |
+| CND bytes | 12.02 GiB (480 MATLAB files) |
 
-The generated corpus is local and ignored by Git at `outputs/nm000132/0.3.0/`.
-The code, six experiment recipes, corpus recipe, immutable 240-job plan, tests,
-and this report are stored in the repository.
+Lives at `outputs/nm000132/0.3.0/` (gitignored).
 
-## Experiment coverage
+## Tasks
 
-| Task | Recordings | Duration (s) | Reviewed event features |
+| Task | Recordings | Duration (s) | Event features |
 |---|---:|---:|---|
-| MMN | 40 | 24,221 | Context standards, standards, deviants |
-| N170 | 40 | 23,613 | Faces, cars, scrambled controls, responses |
-| N2pc | 40 | 24,116 | Left/right targets, correct/incorrect responses |
-| N400 | 40 | 17,691 | Related/unrelated primes and targets, responses |
-| P3 | 40 | 15,359 | Targets, non-targets, responses |
-| Flankers | 40 | 30,885 | Congruent/incongruent left/right stimuli, responses |
+| MMN | 40 | 24,221 | context standards, standards, deviants |
+| N170 | 40 | 23,613 | faces, cars, scrambled, responses |
+| N2pc | 40 | 24,116 | left/right targets, correct/incorrect |
+| N400 | 40 | 17,691 | related/unrelated primes and targets, responses |
+| P3 | 40 | 15,359 | targets, non-targets, responses |
+| Flankers | 40 | 30,885 | congruent/incongruent left/right, responses |
 
-All recordings use a 1024 Hz source clock. Durations range from 328 seconds
-(`sub-006_task-P3`) to 1,049 seconds (`sub-008_task-flankers`). Each recording
-remains one continuous CND trial. There is no filtering, resampling,
-rereferencing, artifact rejection, epoching, padding, or truncation.
+All 1024 Hz. Shortest `sub-006_task-P3` (328 s), longest `sub-008_task-flankers` (1,049 s). One CND trial per recording. No filtering, resampling, rereferencing, artifact rejection, epoching, padding.
 
-Each BIDS source contains 30 EEG and three EOG channels. The reviewed
-`eeg_only` policy preserves the 30 EEG channels in CND and excludes the EOG
-channels rather than relabelling them as EEG.
+BIDS has 30 EEG + 3 EOG. We kept the 30 EEG (`eeg_only`) and dropped EOG rather than relabelling them.
 
-## Format-specific finding
+## `events.tsv` counts from 1
 
-The release's `events.tsv` sample values are effectively one-based. Treating
-them as zero-based produced a consistent 1.0512-sample disagreement with the
-rounded onset timestamps, and the first pilot attempt correctly rejected all
-six recordings.
+If you treat the sample column as zero-based, every event is about 1.05 samples off. The first pilot failed all six tasks that way. Recipes now say `sample_index_origin: 1`. After that, the worst timing error in the full corpus is 0.00005 s (0.0512 sample). That shift is written in every manifest.
 
-The recipes now explicitly declare `sample_index_origin: 1`. After subtracting
-that origin, the maximum observed event-timing discrepancy across the complete
-corpus is 0.00005 seconds, or 0.0512 sample. This transformation is recorded in
-every manifest; it is not an implicit correction.
+## Checks
 
-## Validation
+All 240 passed: checksums, planned size/rate/duration, strict CND before and after MATLAB write, CND-MNE numbers on the 30-channel matrix, impulse tracks.
 
-Every one of the 240 independent releases passed:
+Rehashed all 480 MATLAB files (12,908,616,770 bytes) against the manifests. No warnings.
 
-- source-object SHA-256 or Git-blob checksum verification;
-- planned channel, sampling-frequency, duration, and sample-count checks;
-- strict CND 1.0 validation before writing;
-- MATLAB v5 write and read-back;
-- strict CND validation after reading;
-- CND-to-MNE numerical comparison of the full 30-channel neural matrix;
-- exact stimulus-feature comparison;
-- transactional publication.
-
-There were zero strict-CND warnings, zero round-trip warnings, and 240 unique
-release IDs. A separate final audit independently rehashed all 480 generated
-MATLAB files and verified all 12,908,616,770 bytes against their manifests.
-
-The content hash of the whole corpus (each recording's identity plus its array hash) is:
+Content hash of the whole corpus:
 
 ```text
 87002049c5850116f3fa064201f37ae8a8d0fdec79c31a22e91fab46632c03c6
 ```
 
-## Source cleanup
+## Cache
 
-After each successful recording, its subject/task source files were removed
-from the cache. The final ERP CORE source cache contains only the dataset
-description and six task event dictionaries—36 KB total. No bulk source EEG
-remains locally.
+Subject/task sources are deleted after each success. Leftover cache is the dataset description plus six event dictionaries, 36 KB.
 
 ## Reproduce
 
