@@ -8,7 +8,7 @@ PhysioNet EEG Motor Movement/Imagery v1.0.0, subject 1, run 3 (`S001R03.edf`). L
 - **Source SHA-256:** `3427c8d01bff1380bc9ab9f27a35ece2af5dfadf3e291bbc05eb66e4dadbfe2e`
 
 The exact scientific and technical choices are declared in
-[`recipes/eegmmidb-s001-r03.json`](../recipes/eegmmidb-s001-r03.json).
+[`recipes/eegmmidb-s001-r03.json`](../../recipes/eegmmidb-s001-r03.json).
 
 ## CND representation
 

@@ -8,7 +8,7 @@ OpenNeuro `ds004574` v1.0.0, subject 001, oddball. This is the fixture that was 
 - **Source snapshot SHA-256:** `21fb996b5f6d6b2bd65d196ad90610c2a6771b920397f7c3cf547b009b1710d4`
 
 Every constituent file has its own SHA-256 in
-[`recipes/ds004574-sub001-oddball.json`](../recipes/ds004574-sub001-oddball.json).
+[`recipes/ds004574-sub001-oddball.json`](../../recipes/ds004574-sub001-oddball.json).
 Metadata URLs are pinned to repository commit
 `b7c69a16695968de78a3d1f1277654cc85884261`; the two large signal files are
 content-pinned by checksum.
