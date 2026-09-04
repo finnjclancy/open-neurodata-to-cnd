@@ -4,6 +4,8 @@ Turn publicly shared EEG into **CND**, the MATLAB layout the Di Liberto lab alre
 
 [CND-MNE](https://github.com/finnjclancy/cnd-mne-converter) reads and writes those MATLAB files. This repo is the pipeline that *creates* CND from other public formats (OpenNeuro, PhysioNet, and similar).
 
+This repo is public. It is an early research build and is not on PyPI.
+
 A lot of EEG is already public, usually as **BIDS** or **EDF**. The [Di Liberto lab](https://www.diliberg.net/) stores its own work as CND. Collections that are already CND are on the [CNSP dataset catalogue](https://cnsp-resources.readthedocs.io/en/latest/datasetsPage.html).
 
 This project downloads one pinned public file, follows a **recipe** (which channels, what a trial is, which events become stimulus tracks), writes CND, and checks it with CND-MNE. Git only stores recipes and checksums. Recordings stay in `cache/` and `outputs/` on your machine.

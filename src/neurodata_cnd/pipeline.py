@@ -56,6 +56,10 @@ def convert_recipe(
     resolved_recipe = (
         load_recipe(recipe) if not isinstance(recipe, ConversionRecipe) else recipe
     )
+    if resolved_recipe.status != "active":
+        raise ValueError(
+            f"Recipe status {resolved_recipe.status!r} is not directly executable"
+        )
     snapshot = acquire_source(
         resolved_recipe.source, cache_root, source_override=source_override
     )

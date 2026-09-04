@@ -10,9 +10,12 @@ import time
 import urllib.error
 import urllib.request
 from dataclasses import dataclass
+from importlib.metadata import version
 from pathlib import Path
 
 from .recipe import SourceSpec
+
+USER_AGENT = f"open-neurodata-to-cnd/{version('open-neurodata-to-cnd')}"
 
 
 class SourceIntegrityError(RuntimeError):
@@ -141,7 +144,7 @@ def _download(
         for attempt in range(1, 5):
             try:
                 request = urllib.request.Request(
-                    url, headers={"User-Agent": "open-neurodata-to-cnd/0.2"}
+                    url, headers={"User-Agent": USER_AGENT}
                 )
                 with urllib.request.urlopen(request, timeout=120) as response:
                     with temporary.open("wb") as handle:
