@@ -24,7 +24,7 @@ Other candidates: [catalog/datasets.json](catalog/datasets.json) (`candidate`, `
 
 ## Install
 
-You need [git](https://git-scm.com/), [uv](https://docs.astral.sh/uv/), Python 3.10 or newer, and access to the private [cnd-mne](https://github.com/finnjclancy/cnd-mne-converter) repo.
+You need [git](https://git-scm.com/), [uv](https://docs.astral.sh/uv/), and Python 3.10 or newer. The project installs [cnd-mne](https://github.com/finnjclancy/cnd-mne-converter) as a dependency.
 
 ```bash
 git clone https://github.com/finnjclancy/open-neurodata-to-cnd.git
