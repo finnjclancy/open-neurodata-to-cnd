@@ -52,16 +52,9 @@
   "output": {
     "format": "CND 1.0",
     "mat_version": "7.3",
-    "strict_validation": true,
-    "one_neural_file_per_subject": true,
-    "shared_stimulus_file": true
+    "neural_unit": "confirm-before-use"
   },
-  "validation": {
-    "require_source_reconciliation": true,
-    "require_cnd_mne_load": true,
-    "require_round_trip_sample": true,
-    "fail_on_warning": true
-  },
+  "validation": {},
   "license": {
     "neural_data": "verify from pinned source snapshot",
     "stimulus_assets": "verify audiobook redistribution and derivative-feature rights",

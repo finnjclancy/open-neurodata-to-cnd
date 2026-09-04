@@ -18,7 +18,7 @@ from pathlib import Path
 from typing import Any
 
 from .recipe import ConversionRecipe, SourceFileSpec, load_recipe
-from .source import remove_cached_source_files
+from .source import USER_AGENT, remove_cached_source_files
 
 
 class CorpusPlanError(ValueError):
@@ -483,6 +483,7 @@ def _job_recipe(plan: dict[str, Any], job: dict[str, Any]) -> ConversionRecipe:
         base,
         recipe_id=f"{base.recipe_id}:{job['recording_id']}",
         recipe_version=str(plan["corpus_version"]),
+        status="active",
         source=source,
         selection=selection,
         output=output,
@@ -746,9 +747,7 @@ def _entry(by_path: dict[str, dict[str, Any]], path: str) -> dict[str, Any]:
 
 
 def _fetch(url: str) -> bytes:
-    request = urllib.request.Request(
-        url, headers={"User-Agent": "open-neurodata-to-cnd/0.2"}
-    )
+    request = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
     with urllib.request.urlopen(request, timeout=120) as response:
         return response.read()
 

@@ -192,7 +192,7 @@ wheels = [
 [[package]]
 name = "cnd-mne-converter"
 version = "0.1.0.dev0"
-source = { git = "https://github.com/finnjclancy/cnd-mne-converter.git?rev=1b48b432aa127a46d5962e7b652ab4b04deb3754#1b48b432aa127a46d5962e7b652ab4b04deb3754" }
+source = { git = "https://github.com/finnjclancy/cnd-mne-converter.git?rev=2d7e4de2951e5fcc1e1b136af3fe8535a907d7e7#2d7e4de2951e5fcc1e1b136af3fe8535a907d7e7" }
 dependencies = [
     { name = "h5py" },
     { name = "hdf5storage" },
@@ -1626,8 +1626,8 @@ test = [
 
 [package.metadata]
 requires-dist = [
-    { name = "cnd-mne-converter", marker = "extra == 'conversion'", git = "https://github.com/finnjclancy/cnd-mne-converter.git?rev=1b48b432aa127a46d5962e7b652ab4b04deb3754" },
-    { name = "cnd-mne-converter", marker = "extra == 'dev'", git = "https://github.com/finnjclancy/cnd-mne-converter.git?rev=1b48b432aa127a46d5962e7b652ab4b04deb3754" },
+    { name = "cnd-mne-converter", marker = "extra == 'conversion'", git = "https://github.com/finnjclancy/cnd-mne-converter.git?rev=2d7e4de2951e5fcc1e1b136af3fe8535a907d7e7" },
+    { name = "cnd-mne-converter", marker = "extra == 'dev'", git = "https://github.com/finnjclancy/cnd-mne-converter.git?rev=2d7e4de2951e5fcc1e1b136af3fe8535a907d7e7" },
     { name = "edfio", marker = "extra == 'dev'", specifier = ">=0.4" },
     { name = "edfio", marker = "extra == 'test'", specifier = ">=0.4" },
     { name = "jsonschema", marker = "extra == 'dev'", specifier = ">=4.23" },

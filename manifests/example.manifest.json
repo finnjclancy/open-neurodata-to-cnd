@@ -1,39 +1,103 @@
 {
   "manifest_version": "1.0.0",
-  "release_id": "ds006434/cnd-v0.1.0-example",
-  "status": "example-only",
+  "release_id": "synthetic/test-5",
+  "status": "validated-local-build",
   "source": {
-    "dataset_id": "ds006434",
-    "provider": "OpenNeuro",
-    "version": "PIN_BEFORE_USE",
+    "dataset_id": "synthetic",
+    "provider": "test",
+    "version": "1.0.0",
     "doi": null,
-    "snapshot_sha256": null
+    "url": "https://example.test/dataset",
+    "size_bytes": 5017,
+    "sha256": "3d1279c2d0afd6019b12715a06504c2dee0f195a08eafa3704f83543ba95aaad",
+    "primary_checksum_algorithm": "sha256",
+    "primary_checksum": "3d1279c2d0afd6019b12715a06504c2dee0f195a08eafa3704f83543ba95aaad",
+    "snapshot_sha256": "e69d7f8c5f90d84b28d853174fcede78212d8560c9799ed55356c034b6f3a3e6",
+    "primary_path": "source_raw.fif",
+    "files": [
+      {
+        "path": "source_raw.fif",
+        "size_bytes": 5017,
+        "sha256": "3d1279c2d0afd6019b12715a06504c2dee0f195a08eafa3704f83543ba95aaad"
+      }
+    ]
   },
   "conversion": {
-    "recipe_id": "ds006434-cnd",
-    "recipe_version": "0.1.0-draft",
-    "repository_commit": "REPLACE_AT_RUNTIME",
-    "cnd_mne_commit": "REPLACE_AT_RUNTIME",
-    "environment_digest": "REPLACE_AT_RUNTIME"
+    "recipe_id": "synthetic-cnd-events",
+    "recipe_version": "test-5",
+    "software": {
+      "open-neurodata-to-cnd": "0.1.0.dev0",
+      "cnd-mne-converter": "0.1.0.dev0",
+      "mne": "1.12.1",
+      "mne-bids": "0.19.0",
+      "python": "3.13.5"
+    },
+    "reader": "fif",
+    "channel_type_policy": "source",
+    "channel_type_evidence": null,
+    "feature_mappings": [
+      {
+        "name": "a_onset",
+        "kind": "annotation_impulse",
+        "source_annotation": "A",
+        "source_column": null,
+        "source_value": null,
+        "source_values": null
+      },
+      {
+        "name": "b_onset",
+        "kind": "annotation_impulse",
+        "source_annotation": "B",
+        "source_column": null,
+        "source_value": null,
+        "source_values": null
+      }
+    ],
+    "synchronization": {
+      "event_source": "annotations"
+    },
+    "trial_policy": "recording_run",
+    "neural_unit": "V"
   },
   "contents": {
     "modality": "eeg",
-    "subjects": 0,
-    "trials": 0,
-    "features": [],
-    "duration_seconds": 0,
-    "files": []
+    "subjects": 1,
+    "trials": 1,
+    "channels": 2,
+    "samples": 500,
+    "sampling_frequency_hz": 100.0,
+    "duration_seconds": 5.0,
+    "features": [
+      "a_onset",
+      "b_onset"
+    ],
+    "event_counts": {
+      "a_onset": 2,
+      "b_onset": 1
+    },
+    "files": [
+      {
+        "path": "dataCND/dataSub1.mat",
+        "size_bytes": 1289,
+        "sha256": "f83e9d652f820e8996ac4590107128bd29cda9253b530cc8796a09a661dcf301"
+      },
+      {
+        "path": "dataCND/dataStim.mat",
+        "size_bytes": 416,
+        "sha256": "fc965983f5522d38a426f630fca06d4693f6ae85367d83004410e4afce05ffc9"
+      }
+    ],
+    "canonical_content_sha256": "90620831391b2d5f562821d39ce8a66303a6c2248094fbb908246d20425ff605"
   },
   "validation": {
-    "strict_cnd": "not_run",
-    "cnd_to_mne": "not_run",
-    "source_reconciliation": "not_run",
-    "warnings": []
+    "strict_cnd": "pass",
+    "cnd_to_mne": "pass",
+    "source_reconciliation": "pass",
+    "max_event_quantization_error_seconds": 0.0,
+    "strict_warnings": [],
+    "round_trip_warnings": []
   },
   "licenses": {
-    "neural_data": "REPLACE_AT_RUNTIME",
-    "stimulus_assets": "REPLACE_AT_RUNTIME",
-    "derived_release": "REPLACE_AT_RUNTIME"
-  },
-  "published_at": null
+    "neural_data": "synthetic test data"
+  }
 }

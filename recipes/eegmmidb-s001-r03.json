@@ -75,7 +75,7 @@
   "license": {
     "neural_data": "Open Data Commons Attribution License v1.0",
     "stimulus_assets": "No separate stimulus media are embedded",
-    "derived_release": "Review attribution text before public release"
+    "derived_release": "ODC-By-1.0; cite PhysioNet DOI 10.13026/C28G6P and Schalk et al. (2004)"
   },
   "notes": [
     "This vertical slice converts subject 1, run 3 only; it is not the complete dataset.",

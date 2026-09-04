@@ -182,6 +182,22 @@ def load_recipe(path: str | Path) -> ConversionRecipe:
         raise RecipeError("output.format must be 'CND 1.0'")
     if str(output.get("mat_version", "5")) not in {"5", "7.3"}:
         raise RecipeError("output.mat_version must be '5' or '7.3'")
+    for key in (
+        "strict_validation",
+        "one_neural_file_per_subject",
+        "shared_stimulus_file",
+    ):
+        if key in output and output[key] is not True:
+            raise RecipeError(f"output.{key} is a fixed pipeline guarantee")
+    validation = _mapping(payload, "validation")
+    for key in (
+        "require_source_checksum",
+        "require_source_reconciliation",
+        "require_cnd_mne_load",
+        "require_round_trip_sample",
+    ):
+        if key in validation and validation[key] is not True:
+            raise RecipeError(f"validation.{key} is a fixed pipeline guarantee")
 
     return ConversionRecipe(
         path=recipe_path,
@@ -202,7 +218,7 @@ def load_recipe(path: str | Path) -> ConversionRecipe:
         features=tuple(feature_specs),
         synchronization=_mapping(payload, "synchronization"),
         output=output,
-        validation=_mapping(payload, "validation"),
+        validation=validation,
         license=_mapping(payload, "license"),
         notes=tuple(str(note) for note in payload.get("notes", ())),
     )

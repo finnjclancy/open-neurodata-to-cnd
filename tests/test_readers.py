@@ -6,7 +6,22 @@ import mne
 import pytest
 from conftest import synthetic_raw
 
-from neurodata_cnd.readers import read_raw
+from neurodata_cnd.readers import _reader_from_suffix, read_raw
+
+
+@pytest.mark.parametrize(
+    ("suffix", "reader"),
+    [
+        (".edf", "edf"),
+        (".bdf", "bdf"),
+        (".vhdr", "brainvision"),
+        (".fif", "fif"),
+        (".set", "eeglab"),
+        (".gdf", "gdf"),
+    ],
+)
+def test_reader_is_inferred_from_supported_suffix(suffix: str, reader: str) -> None:
+    assert _reader_from_suffix(Path(f"recording{suffix.upper()}")) == reader
 
 
 @pytest.mark.parametrize(

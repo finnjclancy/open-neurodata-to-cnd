@@ -35,5 +35,15 @@ def test_all_corpus_recipes_match_the_corpus_schema() -> None:
         assert not errors, f"{path.name}: {errors}"
 
 
+def test_all_committed_plans_match_the_plan_schema() -> None:
+    schema = _load(ROOT / "schemas" / "plan.schema.json")
+    validator = Draft202012Validator(schema)
+    for path in sorted((ROOT / "plans").glob("*.json")):
+        errors = sorted(
+            validator.iter_errors(_load(path)), key=lambda error: error.path
+        )
+        assert not errors, f"{path.name}: {errors}"
+
+
 def _load(path: Path) -> object:
     return json.loads(path.read_text(encoding="utf-8"))

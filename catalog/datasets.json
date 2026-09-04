@@ -1,6 +1,6 @@
 {
   "catalog_version": "0.1.0",
-  "reviewed_at": "2026-08-29",
+  "reviewed_at": "2026-09-03",
   "datasets": [
     {
       "id": "ds007808",
@@ -170,6 +170,32 @@
       "status": "converted",
       "scale": {"subjects": 40, "recordings": 240, "size_gb": 14.1},
       "tags": ["ERP", "BIDS", "MMN", "N170", "N2pc", "N400", "P3", "ERN", "LRP"]
+    },
+    {
+      "id": "eegmmidb",
+      "name": "EEG Motor Movement/Imagery Dataset",
+      "url": "https://physionet.org/content/eegmmidb/1.0.0/",
+      "provider": "PhysioNet",
+      "modalities": ["eeg"],
+      "access": "open",
+      "license": "ODC-By-1.0",
+      "priority": 14,
+      "status": "converted-slice",
+      "scale": {"subjects": 1, "recordings": 1, "channels": 64},
+      "tags": ["motor", "movement", "imagery", "EDF", "events"]
+    },
+    {
+      "id": "ds004574",
+      "name": "Parkinson's disease visual oddball EEG",
+      "url": "https://openneuro.org/datasets/ds004574/versions/1.0.0",
+      "provider": "OpenNeuro/NEMAR",
+      "modalities": ["eeg"],
+      "access": "open",
+      "license": "CC0",
+      "priority": 15,
+      "status": "converted",
+      "scale": {"subjects": 146, "recordings": 146, "size_gb": 21.92},
+      "tags": ["Parkinson's disease", "oddball", "BIDS", "events"]
     }
   ]
 }

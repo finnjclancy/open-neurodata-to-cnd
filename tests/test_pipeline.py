@@ -9,6 +9,37 @@ from conftest import synthetic_raw, write_test_recipe
 from jsonschema import Draft202012Validator
 
 from neurodata_cnd.pipeline import convert_recipe
+from neurodata_cnd.recipe import RecipeError, load_recipe
+
+
+def test_fixed_pipeline_guarantees_cannot_be_disabled(tmp_path: Path) -> None:
+    source = tmp_path / "source_raw.fif"
+    synthetic_raw().save(source, overwrite=True, verbose="ERROR")
+    recipe = write_test_recipe(tmp_path / "recipe.json", source)
+    payload = json.loads(recipe.read_text(encoding="utf-8"))
+    payload["validation"]["require_round_trip_sample"] = False
+    recipe.write_text(json.dumps(payload), encoding="utf-8")
+
+    with pytest.raises(RecipeError, match="fixed pipeline guarantee"):
+        load_recipe(recipe)
+
+
+@pytest.mark.parametrize("status", ["draft", "reviewed", "deprecated"])
+def test_only_active_recipes_run_directly(tmp_path: Path, status: str) -> None:
+    source = tmp_path / "source_raw.fif"
+    synthetic_raw().save(source, overwrite=True, verbose="ERROR")
+    recipe = write_test_recipe(tmp_path / "recipe.json", source)
+    payload = json.loads(recipe.read_text(encoding="utf-8"))
+    payload["status"] = status
+    recipe.write_text(json.dumps(payload), encoding="utf-8")
+
+    with pytest.raises(ValueError, match="not directly executable"):
+        convert_recipe(
+            recipe,
+            cache_root=tmp_path / "cache",
+            output_root=tmp_path / "outputs",
+            source_override=source,
+        )
 
 
 @pytest.mark.parametrize("mat_version", ["5", "7.3"])

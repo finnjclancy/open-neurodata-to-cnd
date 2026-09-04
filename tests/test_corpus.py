@@ -65,6 +65,89 @@ def test_erp_core_corpus_recipe_declares_all_six_experiments() -> None:
     ]
 
 
+def test_plan_corpus_builds_a_pinned_recording_plan(
+    tmp_path: Path, monkeypatch
+) -> None:
+    source = tmp_path / "source_raw.fif"
+    synthetic_raw().save(source, overwrite=True, verbose="ERROR")
+    template = write_test_recipe(tmp_path / "template.json", source)
+    metadata_url = "https://example.test/sub-001_eeg.json"
+    metadata = json.dumps(
+        {
+            "EEGChannelCount": 2,
+            "SamplingFrequency": 100,
+            "RecordingDuration": 5,
+        }
+    ).encode()
+    entries = [
+        {
+            "path": "sub-001/eeg/sub-001_task-Test_eeg.set",
+            "size": 100,
+            "checksum_algorithm": "sha256",
+            "checksum": "a" * 64,
+            "bytes_url": "https://example.test/sub-001_eeg.set",
+        },
+        {
+            "path": "sub-001/eeg/sub-001_task-Test_eeg.json",
+            "size": 50,
+            "checksum_algorithm": "sha256",
+            "checksum": hashlib.sha256(metadata).hexdigest(),
+            "bytes_url": metadata_url,
+        },
+    ]
+    inventory = json.dumps(entries).encode()
+    stable = [
+        {
+            key: entry[key]
+            for key in ("path", "size", "checksum_algorithm", "checksum", "bytes_url")
+        }
+        for entry in entries
+    ]
+    inventory_digest = hashlib.sha256(
+        json.dumps(stable, sort_keys=True, separators=(",", ":")).encode()
+    ).hexdigest()
+    corpus_recipe = tmp_path / "corpus.json"
+    corpus_recipe.write_text(
+        json.dumps(
+            {
+                "corpus_id": "example",
+                "corpus_version": "0.1.0",
+                "status": "active",
+                "template_recipe": template.name,
+                "inventory": {
+                    "url": "https://example.test/inventory.json",
+                    "canonical_sha256": inventory_digest,
+                },
+                "source": {
+                    "dataset_id": "example",
+                    "provider": "fixture",
+                    "version": "1.0.0",
+                    "url": "https://example.test/dataset",
+                },
+                "layout": {
+                    "task": "Test",
+                    "extension": ".set",
+                    "shared_paths": [],
+                    "recording_suffixes": ["_eeg.set", "_eeg.json"],
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    def fake_fetch(url: str) -> bytes:
+        if url == metadata_url:
+            return metadata
+        return inventory
+
+    monkeypatch.setattr(corpus, "_fetch", fake_fetch)
+    plan = corpus.plan_corpus(corpus_recipe, tmp_path / "plan.json")
+
+    assert plan["recording_count"] == 1
+    assert plan["jobs"][0]["recording_id"] == "sub-001"
+    assert plan["jobs"][0]["expected"]["channels"] == 2
+
+
 def test_batch_is_resumable_and_builds_index(tmp_path: Path, monkeypatch) -> None:
     raw = synthetic_raw()
     source = tmp_path / "source_raw.fif"

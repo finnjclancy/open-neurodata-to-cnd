@@ -12,25 +12,27 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: actions/setup-python@v7
+      - uses: astral-sh/setup-uv@v7
         with:
           python-version: "3.12"
-      - name: Install package and test dependencies
-        run: python -m pip install -e '.[test]'
+          enable-cache: true
+      - name: Install the locked development environment
+        run: uv sync --extra dev --locked
       - name: Validate catalogue, recipes, schemas, and example manifests
-        run: python scripts/validate_catalog.py
-      - name: Run public-dependency tests
-        run: >-
-          pytest
-          tests/test_corpus.py
-          tests/test_features.py
-          tests/test_metadata.py
-          tests/test_readers.py
-          tests/test_source.py
+        run: uv run python scripts/validate_catalog.py
+      - name: Run offline tests, including the CND round trip
+        run: uv run pytest -m "not integration"
       - name: Run static checks
         run: |
-          ruff check .
-          ruff format --check .
-          mypy src
+          uv run ruff check .
+          uv run ruff format --check .
+          uv run mypy src
+      - name: Build and install the wheel
+        run: |
+          uv build
+          uv venv /tmp/open-neurodata-wheel
+          uv pip install --python /tmp/open-neurodata-wheel/bin/python dist/*.whl
+          /tmp/open-neurodata-wheel/bin/python -c "import neurodata_cnd"
+          /tmp/open-neurodata-wheel/bin/neurodata-to-cnd --help
       - name: Check whitespace errors
         run: "git show --check --oneline --pretty=format: HEAD"
