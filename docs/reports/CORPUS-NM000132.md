@@ -78,8 +78,14 @@ uv run neurodata-to-cnd status outputs/nm000132/0.4.0
 All 240 final outputs passed the configured MATLAB R2026a validation using
 unchanged upstream CNSP and mTRF functions. The check performs 1–8 Hz filtering,
 downsampling to 64 Hz, bad-channel detection/interpolation, average reference,
-five-block cross-validation, model training and held-out prediction. It uses all
+cross-validation and training on four analysis blocks, with the fifth held
+out for prediction. The corrected driver uses ridge regularisation for both
+parameter selection and final fitting. It uses all
 declared stimulus features as separate predictors and removes only the idle tail
 after the final event, retaining the 600 ms response window. All model weights
 and reported correlations were finite. This is a compatibility check, not a
 claim of scientific validity or predictive significance.
+
+The corrected 20 September rerun is documented in
+[GIOVANNI-FEEDBACK.md](GIOVANNI-FEEDBACK.md), with per-recording evidence in
+[matlab-full-corpus-ridge](giovanni-validation/matlab-full-corpus-ridge/).

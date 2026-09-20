@@ -35,10 +35,18 @@ You need [git](https://git-scm.com/), [uv](https://docs.astral.sh/uv/), and Pyth
 ```bash
 git clone https://github.com/finnjclancy/open-neurodata-to-cnd.git
 cd open-neurodata-to-cnd
-uv sync --extra dev
+uv sync --locked --extra dev
 ```
 
-`uv sync --extra test` skips CND-MNE and only runs the metadata tests. You cannot convert without CND-MNE.
+The development and conversion extras pin CND-MNE to published revision
+`c1682e187bbb31b4bc652646f598e172af9ce63b`, including CNSP-compatible external
+channel cells and EEGLAB spherical/polar coordinate export. A separate local
+converter checkout is not needed. For conversion without development tools,
+use `uv sync --locked --extra conversion`.
+
+The `test` extra omits CND-MNE; use `dev` to run the complete offline suite,
+including conversion tests. See [installation verification](docs/reports/INSTALLATION-VALIDATION.md)
+for clean-environment and built-wheel checks.
 
 ## Convert one recording
 

@@ -1,0 +1,51 @@
+{
+  "python": "3.13.5",
+  "packages": {
+    "open-neurodata-to-cnd": "0.1.0.dev0",
+    "cnd-mne-converter": "0.1.0.dev0",
+    "mne": "1.13.2",
+    "mne-bids": "0.19.0",
+    "numpy": "2.5.3",
+    "scipy": "1.16.3"
+  },
+  "converter_source": {
+    "url": "https://github.com/finnjclancy/cnd-mne-converter.git",
+    "vcs_info": {
+      "vcs": "git",
+      "commit_id": "c1682e187bbb31b4bc652646f598e172af9ce63b",
+      "requested_revision": "c1682e187bbb31b4bc652646f598e172af9ce63b"
+    }
+  },
+  "pipeline_installation": "built wheel in isolated environment; no editable packages",
+  "recording": "sub-001_task-P3",
+  "samples": 478208,
+  "eeg_channels": 30,
+  "external_channels": 3,
+  "coordinate_fields": [
+    "X",
+    "Y",
+    "Z",
+    "sph_theta",
+    "sph_phi",
+    "sph_radius",
+    "theta",
+    "radius"
+  ],
+  "external_matlab_cell": true,
+  "eeg_eog_stimulus_equal_to_validated_corpus": true,
+  "mne_filter_psd_finite": true,
+  "validation": {
+    "strict_cnd": "pass",
+    "cnd_to_mne": "pass",
+    "external_channels_round_trip": "pass",
+    "channel_locations_round_trip": "pass",
+    "source_reconciliation": "pass",
+    "max_event_quantization_error_seconds": 5.000000000165983e-05,
+    "strict_warnings": [],
+    "round_trip_warnings": []
+  },
+  "input_sha256": {
+    "dataStim.mat": "1201a6fc74c3cd02cdda9c3d92feceecb12734714f5a47265bc0b7b4cc4160c1",
+    "dataSub1.mat": "bdfa2c3a636dac8ffd28b37cebccfbc3f1d357f6a242bdcc73081b0e6c2f804f"
+  }
+}

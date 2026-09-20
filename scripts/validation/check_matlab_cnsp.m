@@ -62,16 +62,20 @@ x=x(1:n,:);y=y(1:n,:);
 [xtrain,ytrain,xtest,ytest]=mTRFpartition(x,y,5,5);
 assert(all(cellfun(@(a) any(a(:)),xtrain)) && any(xtest(:)));
 lambdas=[.1,1,10];
-stats=mTRFcrossval(xtrain,ytrain,64,1,-100,600,lambdas,'verbose',0);
+% Use the same regularizer for parameter selection and the final multivariate fit.
+regularization_method='ridge';
+stats=mTRFcrossval(xtrain,ytrain,64,1,-100,600,lambdas,'method',regularization_method,'verbose',0);
 r=squeeze(mean(mean(stats.r,1),3));
 assert(all(isfinite(r(:))));
 [~,best]=max(r);
-model=mTRFtrain(xtrain,ytrain,64,1,-100,600,lambdas(best),'method','Tikhonov','verbose',0);
+model=mTRFtrain(xtrain,ytrain,64,1,-100,600,lambdas(best),'method',regularization_method,'verbose',0);
 [~,teststats]=mTRFpredict(xtest,ytest,model,'verbose',0);
 assert(all(isfinite(model.w(:))) && all(isfinite(teststats.r(:))));
 result=struct('engine',version,'upstream_preprocessing',true,'original_fs',original_fs, ...
     'analysis_fs',64,'samples',n,'channels',size(y,2),'folds',5, ...
     'reference','Avg','feature_index',feature_index,'predictor_columns',size(x,2), ...
+    'regularization_method',regularization_method, ...
+    'training_folds',4,'held_out_fold',5, ...
     'active_task_trim',true,'lambda',lambdas(best), ...
     'mean_test_r',mean(teststats.r(:)),'finite_weights',true);
 fid=fopen(output_file,'w');assert(fid>=0); cleaner=onCleanup(@() fclose(fid));

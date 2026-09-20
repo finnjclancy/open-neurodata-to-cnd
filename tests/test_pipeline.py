@@ -68,6 +68,18 @@ def test_complete_local_conversion_and_round_trip(
     assert result.event_counts == {"a_onset": 2, "b_onset": 1}
     recording = read_cnd(result.neural_path, stimulus_path=result.stimulus_path)
     assert validate_cnd(recording, strict_spec=True).is_valid
+    assert recording.neural is not None
+    locations = recording.neural.channel_locations
+    assert locations is not None
+    assert [location["labels"] for location in locations] == raw.ch_names
+    # Exercise the installed converter through both MATLAB formats: an older
+    # dependency silently omitted the spherical and polar coordinate fields.
+    for location in locations:
+        xyz = [location[key] for key in ("X", "Y", "Z")]
+        angles = [location[key] for key in ("sph_theta", "sph_phi", "theta")]
+        assert np.isfinite(angles).all()
+        assert np.isfinite(location["radius"])
+        np.testing.assert_allclose(location["sph_radius"], np.linalg.norm(xyz))
     manifest = json.loads(result.manifest_path.read_text(encoding="utf-8"))
     root = Path(__file__).resolve().parents[1]
     schema = json.loads(

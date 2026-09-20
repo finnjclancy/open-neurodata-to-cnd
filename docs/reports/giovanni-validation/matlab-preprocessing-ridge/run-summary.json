@@ -1,0 +1,194 @@
+[
+  {
+    "recording_id": "MMN",
+    "task": "MMN",
+    "engine": "matlab",
+    "preprocessing": true,
+    "upstream_revision": "74d26e5b7ded8eb80f56aa26517b7e73ba4a83a7",
+    "feature_index": 2,
+    "exit_code": 0,
+    "input_sha256": {
+      "dataSub1.mat": "3b23c844640ef8c9edf4c0648ac690d7ea0ac7713d4c17a508893f7689579bdc",
+      "dataStim.mat": "f8bce6a11b8bb7b5b1ad8526b5cd8a138f547bbc709330bb931b956b844420aa"
+    },
+    "result": {
+      "engine": "26.1.0.3346908 (R2026a) Update 5",
+      "upstream_preprocessing": true,
+      "original_fs": 1024,
+      "analysis_fs": 64,
+      "samples": 38563,
+      "channels": 30,
+      "folds": 5,
+      "reference": "Avg",
+      "feature_index": 2,
+      "predictor_columns": 1,
+      "regularization_method": "ridge",
+      "training_folds": 4,
+      "held_out_fold": 5,
+      "active_task_trim": true,
+      "lambda": 1,
+      "mean_test_r": 0.10517515953687874,
+      "finite_weights": true
+    }
+  },
+  {
+    "recording_id": "N170",
+    "task": "N170",
+    "engine": "matlab",
+    "preprocessing": true,
+    "upstream_revision": "74d26e5b7ded8eb80f56aa26517b7e73ba4a83a7",
+    "feature_index": 1,
+    "exit_code": 0,
+    "input_sha256": {
+      "dataSub1.mat": "99e0c2281e1d4fe24eec02f5f621a8344b3841ad0241884e1d89cf4d5b380842",
+      "dataStim.mat": "4b0671e2745faccfba313b7c266315a34c585fd4ee4da8546bbd032215a8f77e"
+    },
+    "result": {
+      "engine": "26.1.0.3346908 (R2026a) Update 5",
+      "upstream_preprocessing": true,
+      "original_fs": 1024,
+      "analysis_fs": 64,
+      "samples": 43193,
+      "channels": 30,
+      "folds": 5,
+      "reference": "Avg",
+      "feature_index": 1,
+      "predictor_columns": 1,
+      "regularization_method": "ridge",
+      "training_folds": 4,
+      "held_out_fold": 5,
+      "active_task_trim": true,
+      "lambda": 10,
+      "mean_test_r": 0.05956276477024411,
+      "finite_weights": true
+    }
+  },
+  {
+    "recording_id": "N2pc",
+    "task": "N2pc",
+    "engine": "matlab",
+    "preprocessing": true,
+    "upstream_revision": "74d26e5b7ded8eb80f56aa26517b7e73ba4a83a7",
+    "feature_index": 1,
+    "exit_code": 0,
+    "input_sha256": {
+      "dataSub1.mat": "1972d4afb97279e0e5c2a7296731ab711f37694a8c0d314612491e96112b8248",
+      "dataStim.mat": "7dbf01a7fd3d7e8f72b100609c23581c4570bf8318e6a122e03b48f3c36e4db0"
+    },
+    "result": {
+      "engine": "26.1.0.3346908 (R2026a) Update 5",
+      "upstream_preprocessing": true,
+      "original_fs": 1024,
+      "analysis_fs": 64,
+      "samples": 49108,
+      "channels": 30,
+      "folds": 5,
+      "reference": "Avg",
+      "feature_index": 1,
+      "predictor_columns": 1,
+      "regularization_method": "ridge",
+      "training_folds": 4,
+      "held_out_fold": 5,
+      "active_task_trim": true,
+      "lambda": 0.1,
+      "mean_test_r": 0.09550184069862527,
+      "finite_weights": true
+    }
+  },
+  {
+    "recording_id": "N400",
+    "task": "N400",
+    "engine": "matlab",
+    "preprocessing": true,
+    "upstream_revision": "74d26e5b7ded8eb80f56aa26517b7e73ba4a83a7",
+    "feature_index": 1,
+    "exit_code": 0,
+    "input_sha256": {
+      "dataSub1.mat": "eb47ba92840458f172748d98d0c47c71e6b49e2f3745072add23bbe8f3e1b49e",
+      "dataStim.mat": "db4cc6a07f54ef0ac78e5d2578b79ff1ce05dfc3a7db0f51508609f9713d7c58"
+    },
+    "result": {
+      "engine": "26.1.0.3346908 (R2026a) Update 5",
+      "upstream_preprocessing": true,
+      "original_fs": 1024,
+      "analysis_fs": 64,
+      "samples": 35683,
+      "channels": 30,
+      "folds": 5,
+      "reference": "Avg",
+      "feature_index": 1,
+      "predictor_columns": 1,
+      "regularization_method": "ridge",
+      "training_folds": 4,
+      "held_out_fold": 5,
+      "active_task_trim": true,
+      "lambda": 10,
+      "mean_test_r": 0.04964243494635421,
+      "finite_weights": true
+    }
+  },
+  {
+    "recording_id": "P3",
+    "task": "P3",
+    "engine": "matlab",
+    "preprocessing": true,
+    "upstream_revision": "74d26e5b7ded8eb80f56aa26517b7e73ba4a83a7",
+    "feature_index": 1,
+    "exit_code": 0,
+    "input_sha256": {
+      "dataSub1.mat": "788068c95f04ee1e55164be472aa1dc75b4165c449dfd0ea4ef2009f633b207d",
+      "dataStim.mat": "8bf91af7887b160df5f3d453ccd26cfcfe0a5599aa66f5bffccfd7c02735c6fe"
+    },
+    "result": {
+      "engine": "26.1.0.3346908 (R2026a) Update 5",
+      "upstream_preprocessing": true,
+      "original_fs": 1024,
+      "analysis_fs": 64,
+      "samples": 29367,
+      "channels": 30,
+      "folds": 5,
+      "reference": "Avg",
+      "feature_index": 1,
+      "predictor_columns": 1,
+      "regularization_method": "ridge",
+      "training_folds": 4,
+      "held_out_fold": 5,
+      "active_task_trim": true,
+      "lambda": 10,
+      "mean_test_r": 0.0643060938674134,
+      "finite_weights": true
+    }
+  },
+  {
+    "recording_id": "flankers",
+    "task": "flankers",
+    "engine": "matlab",
+    "preprocessing": true,
+    "upstream_revision": "74d26e5b7ded8eb80f56aa26517b7e73ba4a83a7",
+    "feature_index": 1,
+    "exit_code": 0,
+    "input_sha256": {
+      "dataSub1.mat": "ed777af96e173d43a49765899b2fe953d4d82dfa27df66b1224364ca996aa422",
+      "dataStim.mat": "3565607d2cd89d04aa56ea5b3fdd46c8d7714af92445f8e60e86c5217c7e8077"
+    },
+    "result": {
+      "engine": "26.1.0.3346908 (R2026a) Update 5",
+      "upstream_preprocessing": true,
+      "original_fs": 1024,
+      "analysis_fs": 64,
+      "samples": 58270,
+      "channels": 30,
+      "folds": 5,
+      "reference": "Avg",
+      "feature_index": 1,
+      "predictor_columns": 1,
+      "regularization_method": "ridge",
+      "training_folds": 4,
+      "held_out_fold": 5,
+      "active_task_trim": true,
+      "lambda": 10,
+      "mean_test_r": 0.09114603901151604,
+      "finite_weights": true
+    }
+  }
+]

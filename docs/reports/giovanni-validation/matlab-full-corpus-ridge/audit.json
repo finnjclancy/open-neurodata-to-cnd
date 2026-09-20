@@ -1,0 +1,29 @@
+{
+  "date": "2026-09-20",
+  "recordings": 240,
+  "passed": 240,
+  "tasks": {
+    "MMN": 40,
+    "N170": 40,
+    "N2pc": 40,
+    "N400": 40,
+    "P3": 40,
+    "flankers": 40
+  },
+  "regularization_method": "ridge",
+  "training_folds": 4,
+  "held_out_fold": 5,
+  "all_input_hashes_match_previous_corpus": true,
+  "all_weights_and_mean_correlations_finite": true,
+  "six_single_feature_pilots_passed": true,
+  "fresh_wheel_p3_matlab_passed": true,
+  "upstream_revision": "74d26e5b7ded8eb80f56aa26517b7e73ba4a83a7",
+  "matlab_version": "26.1.0.3346908 (R2026a) Update 5",
+  "execution": "40 recordings sequentially, remaining 200 in three disjoint batches; merged by recording_id",
+  "source_sha256": {
+    "scripts/validation/check_matlab_cnsp.m": "726cea384bdb6370c1e6c6a5910e4d1453d86cb85cdb7a9d21fc682ad2347b18",
+    "scripts/validation/run_validation.py": "86c7e9e6f52a0030f3b7f7e8491ad0faf75becd398e27932332ba9d0a1c1394f"
+  },
+  "run_summary_sha256": "c07b0843315371f410b906ff53676e20b0f470548f5612c8f5ee32241bf04332",
+  "scope": "Format/execution compatibility; not a validated scientific performance evaluation"
+}

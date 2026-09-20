@@ -20,10 +20,10 @@ dependencies = [
 
 [project.optional-dependencies]
 conversion = [
-  "cnd-mne-converter @ git+https://github.com/finnjclancy/cnd-mne-converter.git@2d7e4de2951e5fcc1e1b136af3fe8535a907d7e7",
+  "cnd-mne-converter @ git+https://github.com/finnjclancy/cnd-mne-converter.git@c1682e187bbb31b4bc652646f598e172af9ce63b",
 ]
 dev = [
-  "cnd-mne-converter @ git+https://github.com/finnjclancy/cnd-mne-converter.git@2d7e4de2951e5fcc1e1b136af3fe8535a907d7e7",
+  "cnd-mne-converter @ git+https://github.com/finnjclancy/cnd-mne-converter.git@c1682e187bbb31b4bc652646f598e172af9ce63b",
   "edfio>=0.4",
   "jsonschema>=4.23",
   "mypy>=1.18,<2",

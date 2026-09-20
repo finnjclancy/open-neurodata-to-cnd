@@ -1,0 +1,8 @@
+{
+  "qt_window_created": true,
+  "lalor_trials_loaded": 20,
+  "trial_navigation_passed": true,
+  "plot_controls_enabled": true,
+  "sensor_and_psd_callbacks_passed": true,
+  "execution": "offscreen Qt with Agg plotting backend; not a manual desktop interaction test"
+}

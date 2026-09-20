@@ -31,8 +31,11 @@ jobs:
         run: |
           uv build
           uv venv /tmp/open-neurodata-wheel
-          uv pip install --python /tmp/open-neurodata-wheel/bin/python dist/*.whl
+          for build_wheel in dist/*.whl; do
+            uv pip install --python /tmp/open-neurodata-wheel/bin/python "${build_wheel}[dev]"
+          done
           /tmp/open-neurodata-wheel/bin/python -c "import neurodata_cnd"
           /tmp/open-neurodata-wheel/bin/neurodata-to-cnd --help
+          /tmp/open-neurodata-wheel/bin/python -m pytest -m "not integration"
       - name: Check whitespace errors
         run: "git show --check --oneline --pretty=format: HEAD"
