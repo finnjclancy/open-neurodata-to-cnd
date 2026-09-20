@@ -1,0 +1,5 @@
+Processing CND: Downsampling from fs = 1024 to downFs = 64
+Removing 2 channel(s)...
+badChannels: 1  16
+Processing CND: Re-referencing to Avg
+Processing CND: Downsampling from fs = 1024 to downFs = 64

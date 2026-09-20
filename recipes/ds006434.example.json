@@ -26,14 +26,20 @@
   "features": [
     {
       "name": "attended_envelope",
-      "kind": "continuous",
-      "source": "provided stimulus audio and attention metadata",
+      "kind": "audio_envelope",
+      "source": "stimuli/attended.wav",
+      "method": "hilbert",
+      "compression": 1.0,
+      "normalization": "none",
       "unit": "normalized_amplitude"
     },
     {
       "name": "unattended_envelope",
-      "kind": "continuous",
-      "source": "provided stimulus audio and attention metadata",
+      "kind": "audio_envelope",
+      "source": "stimuli/unattended.wav",
+      "method": "hilbert",
+      "compression": 1.0,
+      "normalization": "none",
       "unit": "normalized_amplitude"
     },
     {
@@ -47,6 +53,7 @@
     "event_source": "events.tsv",
     "earphone_delay": "use corrected source triggers",
     "target_sampling_rate_hz": 1000,
+    "stimulus_sampling_rate_hz": 64,
     "manual_review_required": true
   },
   "output": {

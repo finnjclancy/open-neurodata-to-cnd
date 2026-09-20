@@ -91,11 +91,56 @@ def read_raw(
         if not eeg_channels:
             raise ValueError("The source recording contains no EEG channels")
         raw.pick(eeg_channels)
+    elif channel_type_policy == "eeg_with_external":
+        reviewed_external = selection.get("external_channel_types")
+        if (
+            not isinstance(reviewed_external, list)
+            or not reviewed_external
+            or any(not isinstance(value, str) for value in reviewed_external)
+        ):
+            raise ValueError(
+                "eeg_with_external requires a reviewed external_channel_types list"
+            )
+        channel_types = raw.get_channel_types()
+        unexpected = sorted(set(channel_types) - {"eeg", *reviewed_external})
+        if unexpected:
+            raise ValueError(
+                "Source contains channel types outside the reviewed EEG/external "
+                f"selection: {unexpected!r}"
+            )
+        if "eeg" not in channel_types:
+            raise ValueError("The source recording contains no EEG channels")
+        if not any(kind in reviewed_external for kind in channel_types):
+            raise ValueError(
+                "The source recording contains no reviewed external channels"
+            )
     elif channel_type_policy not in {None, "source"}:
         raise ValueError(f"Unsupported channel type policy {channel_type_policy!r}")
-    if any(channel_type != "eeg" for channel_type in raw.get_channel_types()):
+    if channel_type_policy != "eeg_with_external" and any(
+        channel_type != "eeg" for channel_type in raw.get_channel_types()
+    ):
         raise ValueError("The EEG converter requires every selected channel to be EEG")
     return raw
+
+
+def split_eeg_and_external(
+    raw: mne.io.BaseRaw,
+) -> tuple[mne.io.BaseRaw, mne.io.BaseRaw | None]:
+    """Return EEG and non-EEG views without changing source sample alignment."""
+    channel_types = raw.get_channel_types()
+    eeg_names = [
+        name
+        for name, channel_type in zip(raw.ch_names, channel_types, strict=True)
+        if channel_type == "eeg"
+    ]
+    external_names = [
+        name
+        for name, channel_type in zip(raw.ch_names, channel_types, strict=True)
+        if channel_type != "eeg"
+    ]
+    eeg = raw.copy().pick(eeg_names)
+    external = raw.copy().pick(external_names) if external_names else None
+    return eeg, external
 
 
 def _optional_entity(selection: dict[str, Any], key: str) -> str | None:

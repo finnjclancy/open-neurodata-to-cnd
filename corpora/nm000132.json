@@ -1,11 +1,11 @@
 {
   "$schema": "../schemas/corpus-recipe.schema.json",
   "corpus_id": "nm000132",
-  "corpus_version": "0.3.0",
+  "corpus_version": "0.4.0",
   "status": "active",
   "inventory": {
     "url": "https://data.nemar.org/nm000132/v1.1.1/manifest.json",
-    "canonical_sha256": "0dbfc1f93df8bf90f4c34e7697fec82ae9f0c6af217f0f08b5528354482f5336"
+    "canonical_sha256": "4ad1f14fee74d435c5294038a77280a783c04329d9db296c53bf057d7428a310"
   },
   "source": {
     "dataset_id": "nm000132",

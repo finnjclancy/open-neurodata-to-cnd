@@ -51,6 +51,11 @@ class FeatureSpec:
     source_column: str | None = None
     source_value: str | None = None
     source_values: tuple[str, ...] | None = None
+    source: str | None = None
+    method: str | None = None
+    compression: float = 1.0
+    normalization: str = "none"
+    offset_seconds: float = 0.0
     description: str | None = None
 
 
@@ -98,14 +103,19 @@ def load_recipe(path: str | Path) -> ConversionRecipe:
         if not isinstance(feature, dict):
             raise RecipeError(f"features[{index}] must be an object")
         kind = _text(feature, "kind")
-        if kind not in {"annotation_impulse", "bids_event_impulse"}:
+        if kind not in {
+            "annotation_impulse",
+            "bids_event_impulse",
+            "audio_envelope",
+        }:
             raise RecipeError(
                 f"features[{index}].kind={kind!r} is not implemented; "
-                "supported: annotation_impulse, bids_event_impulse"
+                "supported: annotation_impulse, bids_event_impulse, audio_envelope"
             )
         source_annotation = _optional_text(feature, "source_annotation")
         source_column = _optional_text(feature, "source_column")
         source_value = _optional_text(feature, "source_value")
+        source = _optional_text(feature, "source")
         raw_source_values = feature.get("source_values")
         source_values: tuple[str, ...] | None = None
         if raw_source_values is not None:
@@ -140,6 +150,29 @@ def load_recipe(path: str | Path) -> ConversionRecipe:
                 f"features[{index}] BIDS impulses require source_column and "
                 "source_value or source_values"
             )
+        method = _optional_text(feature, "method")
+        normalization = str(feature.get("normalization", "none")).strip().lower()
+        compression = float(feature.get("compression", 1.0))
+        offset_seconds = float(feature.get("offset_seconds", 0.0))
+        if kind == "audio_envelope":
+            if source is None:
+                raise RecipeError(
+                    f"features[{index}] audio envelopes require a source path"
+                )
+            if method not in {"hilbert", "rectified"}:
+                raise RecipeError(
+                    f"features[{index}].method must be 'hilbert' or 'rectified'"
+                )
+            if compression <= 0:
+                raise RecipeError(f"features[{index}].compression must be positive")
+            if normalization not in {"none", "peak", "zscore"}:
+                raise RecipeError(
+                    f"features[{index}].normalization must be none, peak, or zscore"
+                )
+            if offset_seconds < 0:
+                raise RecipeError(
+                    f"features[{index}].offset_seconds must not be negative"
+                )
         feature_specs.append(
             FeatureSpec(
                 name=_text(feature, "name"),
@@ -149,6 +182,11 @@ def load_recipe(path: str | Path) -> ConversionRecipe:
                 source_column=source_column,
                 source_value=source_value,
                 source_values=source_values,
+                source=source,
+                method=method,
+                compression=compression,
+                normalization=normalization,
+                offset_seconds=offset_seconds,
                 description=_optional_text(feature, "description"),
             )
         )
@@ -162,6 +200,7 @@ def load_recipe(path: str | Path) -> ConversionRecipe:
             feature.source_column,
             feature.source_value,
             feature.source_values,
+            feature.source,
         )
         for feature in feature_specs
     ]

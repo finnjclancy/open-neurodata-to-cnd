@@ -1,0 +1,372 @@
+[
+  {
+    "recording": "sub-001_task-MMN",
+    "contents": {
+      "modality": "eeg",
+      "subjects": 1,
+      "trials": 1,
+      "channels": 30,
+      "external_channels": 3,
+      "external_channel_names": [
+        "HEOG_left",
+        "HEOG_right",
+        "VEOG_lower"
+      ],
+      "external_channel_types": [
+        "eog",
+        "eog",
+        "eog"
+      ],
+      "samples": 622592,
+      "sampling_frequency_hz": 1024.0,
+      "stimulus_sampling_frequency_hz": 1024.0,
+      "duration_seconds": 608.0,
+      "features": [
+        "context_standard_onset",
+        "standard_onset",
+        "deviant_onset"
+      ],
+      "event_counts": {
+        "context_standard_onset": 15,
+        "standard_onset": 785,
+        "deviant_onset": 200
+      },
+      "files": [
+        {
+          "path": "dataCND/dataSub1.mat",
+          "size_bytes": 59363049,
+          "sha256": "3b23c844640ef8c9edf4c0648ac690d7ea0ac7713d4c17a508893f7689579bdc"
+        },
+        {
+          "path": "dataCND/dataStim.mat",
+          "size_bytes": 17990,
+          "sha256": "f8bce6a11b8bb7b5b1ad8526b5cd8a138f547bbc709330bb931b956b844420aa"
+        }
+      ],
+      "canonical_content_sha256": "275f4af4d9bedaaa5235ae262adf99949bb9137d6a9593935db683f241bd260c"
+    },
+    "validation": {
+      "strict_cnd": "pass",
+      "cnd_to_mne": "pass",
+      "external_channels_round_trip": "pass",
+      "channel_locations_round_trip": "pass",
+      "source_reconciliation": "pass",
+      "max_event_quantization_error_seconds": 5.000000000165983e-05,
+      "strict_warnings": [],
+      "round_trip_warnings": []
+    },
+    "manifest_sha256": "6aed532a62659f56b44f3de1169488c2bbdbcd011e18eb53fe4cc559a1dc06ef"
+  },
+  {
+    "recording": "sub-001_task-N170",
+    "contents": {
+      "modality": "eeg",
+      "subjects": 1,
+      "trials": 1,
+      "channels": 30,
+      "external_channels": 3,
+      "external_channel_names": [
+        "HEOG_left",
+        "HEOG_right",
+        "VEOG_lower"
+      ],
+      "external_channel_types": [
+        "eog",
+        "eog",
+        "eog"
+      ],
+      "samples": 699392,
+      "sampling_frequency_hz": 1024.0,
+      "stimulus_sampling_frequency_hz": 1024.0,
+      "duration_seconds": 683.0,
+      "features": [
+        "face_onset",
+        "car_onset",
+        "scrambled_face_onset",
+        "scrambled_car_onset",
+        "correct_response_onset",
+        "incorrect_response_onset"
+      ],
+      "event_counts": {
+        "face_onset": 80,
+        "car_onset": 80,
+        "scrambled_face_onset": 80,
+        "scrambled_car_onset": 80,
+        "correct_response_onset": 244,
+        "incorrect_response_onset": 76
+      },
+      "files": [
+        {
+          "path": "dataCND/dataSub1.mat",
+          "size_bytes": 77533981,
+          "sha256": "99e0c2281e1d4fe24eec02f5f621a8344b3841ad0241884e1d89cf4d5b380842"
+        },
+        {
+          "path": "dataCND/dataStim.mat",
+          "size_bytes": 35754,
+          "sha256": "4b0671e2745faccfba313b7c266315a34c585fd4ee4da8546bbd032215a8f77e"
+        }
+      ],
+      "canonical_content_sha256": "3084a488c7508dd7b5661bb247f809f90301a78ad1136a54f1165b5b3e63bbe5"
+    },
+    "validation": {
+      "strict_cnd": "pass",
+      "cnd_to_mne": "pass",
+      "external_channels_round_trip": "pass",
+      "channel_locations_round_trip": "pass",
+      "source_reconciliation": "pass",
+      "max_event_quantization_error_seconds": 4.999999998744897e-05,
+      "strict_warnings": [],
+      "round_trip_warnings": []
+    },
+    "manifest_sha256": "5db2b259ee1c0ff3f7644887347e2d7a01592095611815e81c85f891c2c54388"
+  },
+  {
+    "recording": "sub-001_task-N2pc",
+    "contents": {
+      "modality": "eeg",
+      "subjects": 1,
+      "trials": 1,
+      "channels": 30,
+      "external_channels": 3,
+      "external_channel_names": [
+        "HEOG_left",
+        "HEOG_right",
+        "VEOG_lower"
+      ],
+      "external_channel_types": [
+        "eog",
+        "eog",
+        "eog"
+      ],
+      "samples": 812032,
+      "sampling_frequency_hz": 1024.0,
+      "stimulus_sampling_frequency_hz": 1024.0,
+      "duration_seconds": 793.0,
+      "features": [
+        "left_target_onset",
+        "right_target_onset",
+        "correct_response_onset",
+        "incorrect_response_onset"
+      ],
+      "event_counts": {
+        "left_target_onset": 160,
+        "right_target_onset": 160,
+        "correct_response_onset": 267,
+        "incorrect_response_onset": 56
+      },
+      "files": [
+        {
+          "path": "dataCND/dataSub1.mat",
+          "size_bytes": 85667970,
+          "sha256": "1972d4afb97279e0e5c2a7296731ab711f37694a8c0d314612491e96112b8248"
+        },
+        {
+          "path": "dataCND/dataStim.mat",
+          "size_bytes": 28105,
+          "sha256": "7dbf01a7fd3d7e8f72b100609c23581c4570bf8318e6a122e03b48f3c36e4db0"
+        }
+      ],
+      "canonical_content_sha256": "cc91162747ac838eb6fe5c10755d6d6ff702b27e57b2571cb15ff6fd8b5883ad"
+    },
+    "validation": {
+      "strict_cnd": "pass",
+      "cnd_to_mne": "pass",
+      "external_channels_round_trip": "pass",
+      "channel_locations_round_trip": "pass",
+      "source_reconciliation": "pass",
+      "max_event_quantization_error_seconds": 5.000000000165983e-05,
+      "strict_warnings": [],
+      "round_trip_warnings": []
+    },
+    "manifest_sha256": "ab912ad979517de5addeee1a40ed6bbf01ad8bc6fbc170ffdca4907f2824a105"
+  },
+  {
+    "recording": "sub-001_task-N400",
+    "contents": {
+      "modality": "eeg",
+      "subjects": 1,
+      "trials": 1,
+      "channels": 30,
+      "external_channels": 3,
+      "external_channel_names": [
+        "HEOG_left",
+        "HEOG_right",
+        "VEOG_lower"
+      ],
+      "external_channel_types": [
+        "eog",
+        "eog",
+        "eog"
+      ],
+      "samples": 585728,
+      "sampling_frequency_hz": 1024.0,
+      "stimulus_sampling_frequency_hz": 1024.0,
+      "duration_seconds": 572.0,
+      "features": [
+        "related_prime_onset",
+        "unrelated_prime_onset",
+        "related_target_onset",
+        "unrelated_target_onset",
+        "correct_response_onset",
+        "incorrect_response_onset"
+      ],
+      "event_counts": {
+        "related_prime_onset": 60,
+        "unrelated_prime_onset": 60,
+        "related_target_onset": 60,
+        "unrelated_target_onset": 60,
+        "correct_response_onset": 110,
+        "incorrect_response_onset": 12
+      },
+      "files": [
+        {
+          "path": "dataCND/dataSub1.mat",
+          "size_bytes": 63871672,
+          "sha256": "eb47ba92840458f172748d98d0c47c71e6b49e2f3745072add23bbe8f3e1b49e"
+        },
+        {
+          "path": "dataCND/dataStim.mat",
+          "size_bytes": 29432,
+          "sha256": "db4cc6a07f54ef0ac78e5d2578b79ff1ce05dfc3a7db0f51508609f9713d7c58"
+        }
+      ],
+      "canonical_content_sha256": "56c53d3e7dd6bd376db3527e10d33e1a36c8be7715f7a1aad3411ce7f9a1c728"
+    },
+    "validation": {
+      "strict_cnd": "pass",
+      "cnd_to_mne": "pass",
+      "external_channels_round_trip": "pass",
+      "channel_locations_round_trip": "pass",
+      "source_reconciliation": "pass",
+      "max_event_quantization_error_seconds": 5.000000000165983e-05,
+      "strict_warnings": [],
+      "round_trip_warnings": []
+    },
+    "manifest_sha256": "b612c4f97fc6f06855f9b58db0d4d967e13cbbddda03d80ab67e43d96f4f224c"
+  },
+  {
+    "recording": "sub-001_task-P3",
+    "contents": {
+      "modality": "eeg",
+      "subjects": 1,
+      "trials": 1,
+      "channels": 30,
+      "external_channels": 3,
+      "external_channel_names": [
+        "HEOG_left",
+        "HEOG_right",
+        "VEOG_lower"
+      ],
+      "external_channel_types": [
+        "eog",
+        "eog",
+        "eog"
+      ],
+      "samples": 478208,
+      "sampling_frequency_hz": 1024.0,
+      "stimulus_sampling_frequency_hz": 1024.0,
+      "duration_seconds": 467.0,
+      "features": [
+        "target_onset",
+        "nontarget_onset",
+        "correct_response_onset",
+        "incorrect_response_onset"
+      ],
+      "event_counts": {
+        "target_onset": 40,
+        "nontarget_onset": 160,
+        "correct_response_onset": 195,
+        "incorrect_response_onset": 7
+      },
+      "files": [
+        {
+          "path": "dataCND/dataSub1.mat",
+          "size_bytes": 53674891,
+          "sha256": "788068c95f04ee1e55164be472aa1dc75b4165c449dfd0ea4ef2009f633b207d"
+        },
+        {
+          "path": "dataCND/dataStim.mat",
+          "size_bytes": 16784,
+          "sha256": "8bf91af7887b160df5f3d453ccd26cfcfe0a5599aa66f5bffccfd7c02735c6fe"
+        }
+      ],
+      "canonical_content_sha256": "5eedbf65d84ecfaecb8c41c90b5fcd45129c2a5bd8fd0efae204f7662596ec77"
+    },
+    "validation": {
+      "strict_cnd": "pass",
+      "cnd_to_mne": "pass",
+      "external_channels_round_trip": "pass",
+      "channel_locations_round_trip": "pass",
+      "source_reconciliation": "pass",
+      "max_event_quantization_error_seconds": 5.000000000165983e-05,
+      "strict_warnings": [],
+      "round_trip_warnings": []
+    },
+    "manifest_sha256": "91ca30338ca67891a42351a6601222e564ed0b4bca1c13de6476a87cd3ff5286"
+  },
+  {
+    "recording": "sub-001_task-flankers",
+    "contents": {
+      "modality": "eeg",
+      "subjects": 1,
+      "trials": 1,
+      "channels": 30,
+      "external_channels": 3,
+      "external_channel_names": [
+        "HEOG_left",
+        "HEOG_right",
+        "VEOG_lower"
+      ],
+      "external_channel_types": [
+        "eog",
+        "eog",
+        "eog"
+      ],
+      "samples": 935936,
+      "sampling_frequency_hz": 1024.0,
+      "stimulus_sampling_frequency_hz": 1024.0,
+      "duration_seconds": 914.0,
+      "features": [
+        "congruent_left_onset",
+        "congruent_right_onset",
+        "incongruent_left_onset",
+        "incongruent_right_onset",
+        "correct_response_onset",
+        "incorrect_response_onset"
+      ],
+      "event_counts": {
+        "congruent_left_onset": 100,
+        "congruent_right_onset": 100,
+        "incongruent_left_onset": 100,
+        "incongruent_right_onset": 100,
+        "correct_response_onset": 346,
+        "incorrect_response_onset": 56
+      },
+      "files": [
+        {
+          "path": "dataCND/dataSub1.mat",
+          "size_bytes": 105142005,
+          "sha256": "ed777af96e173d43a49765899b2fe953d4d82dfa27df66b1224364ca996aa422"
+        },
+        {
+          "path": "dataCND/dataStim.mat",
+          "size_bytes": 47285,
+          "sha256": "3565607d2cd89d04aa56ea5b3fdd46c8d7714af92445f8e60e86c5217c7e8077"
+        }
+      ],
+      "canonical_content_sha256": "90a24a33a52f656dcf0b109c566b00c8d2ce608799f0098f95c354ce6665d10b"
+    },
+    "validation": {
+      "strict_cnd": "pass",
+      "cnd_to_mne": "pass",
+      "external_channels_round_trip": "pass",
+      "channel_locations_round_trip": "pass",
+      "source_reconciliation": "pass",
+      "max_event_quantization_error_seconds": 5.000000000165983e-05,
+      "strict_warnings": [],
+      "round_trip_warnings": []
+    },
+    "manifest_sha256": "747274dc79814cbf3f9c5daca347beee1c8f00c50f78f7f28455a0413670d914"
+  }
+]

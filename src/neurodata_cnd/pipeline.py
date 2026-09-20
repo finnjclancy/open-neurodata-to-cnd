@@ -6,7 +6,7 @@ import json
 import platform
 import shutil
 import tempfile
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, replace
 from hashlib import sha256
 from importlib.metadata import version
 from pathlib import Path
@@ -23,8 +23,13 @@ from cnd_mne import (
     write_cnd,
 )
 
-from .features import annotation_impulses, bids_event_impulses
-from .readers import read_raw
+from .features import (
+    ExtractedFeatures,
+    annotation_impulses,
+    audio_envelopes,
+    bids_event_impulses,
+)
+from .readers import read_raw, split_eeg_and_external
 from .recipe import ConversionRecipe, load_recipe
 from .source import SourceSnapshot, acquire_source, sha256_file
 
@@ -63,7 +68,10 @@ def convert_recipe(
     snapshot = acquire_source(
         resolved_recipe.source, cache_root, source_override=source_override
     )
-    raw = read_raw(snapshot.path, resolved_recipe.selection, source_root=snapshot.root)
+    source_raw = read_raw(
+        snapshot.path, resolved_recipe.selection, source_root=snapshot.root
+    )
+    raw, external_raw = split_eeg_and_external(source_raw)
     extracted = _extract_features(raw, resolved_recipe, snapshot)
     expected_sfreq = resolved_recipe.synchronization.get("target_sampling_rate_hz")
     if expected_sfreq is not None and not np.isclose(
@@ -79,7 +87,7 @@ def convert_recipe(
     )
     if maximum_error_samples is not None:
         observed_error_samples = extracted.max_quantization_error_seconds * float(
-            raw.info["sfreq"]
+            extracted.sfreq
         )
         if observed_error_samples > float(maximum_error_samples) + 1e-12:
             raise ValueError(
@@ -88,8 +96,8 @@ def convert_recipe(
             )
     stimulus = CNDStimulus(
         names=extracted.names,
-        features=tuple((array,) for array in extracted.arrays),
-        sfreq=float(raw.info["sfreq"]),
+        features=tuple((array[:, None],) for array in extracted.arrays),
+        sfreq=extracted.sfreq,
         stimulus_indices=(1,),
         condition_indices=(1,),
         condition_names=(str(resolved_recipe.trials["condition_name"]),),
@@ -103,10 +111,24 @@ def convert_recipe(
         cnd_version=1.0,
         on_unsupported_metadata="ignore",
     )
+    if external_raw is not None:
+        recording = _attach_external_channels(
+            recording,
+            external_raw,
+            unit=str(resolved_recipe.output.get("external_unit", "V")),
+            description=str(
+                resolved_recipe.selection.get(
+                    "external_description", "Auxiliary source channels"
+                )
+            ),
+        )
     if recording.neural is None:
         raise RuntimeError("MNE conversion did not produce CND neural data")
     strict_report = validate_cnd(recording, strict_spec=True)
-    strict_report.raise_for_errors()
+    separate_clocks = not np.isclose(
+        recording.neural.sfreq, stimulus.sfreq, rtol=0, atol=0
+    )
+    _raise_pipeline_validation_errors(strict_report, separate_clocks=separate_clocks)
 
     resolved_destination = (
         Path(destination).expanduser().resolve()
@@ -135,7 +157,9 @@ def convert_recipe(
         if round_trip.stimulus is None:
             raise RuntimeError("CND read-back did not contain stimulus data")
         round_trip_report = validate_cnd(round_trip, strict_spec=True)
-        round_trip_report.raise_for_errors()
+        _raise_pipeline_validation_errors(
+            round_trip_report, separate_clocks=separate_clocks
+        )
         mne_round_trip = to_mne(round_trip, neural_unit=recording.neural.data_unit)
         if len(mne_round_trip.raws) != 1:
             raise RuntimeError("Expected exactly one round-trip CND trial")
@@ -143,6 +167,24 @@ def convert_recipe(
             mne_round_trip.raws[0].get_data(), raw.get_data(), rtol=1e-7, atol=1e-12
         ):
             raise RuntimeError("CND-to-MNE numerical round trip changed the EEG values")
+        if external_raw is not None:
+            round_trip_external = mne_round_trip.external_raws(
+                unit=str(resolved_recipe.output.get("external_unit", "V")),
+                channel_names=external_raw.ch_names,
+                channel_types=external_raw.get_channel_types(),
+            )[0]
+            if not np.allclose(
+                round_trip_external.get_data(),
+                external_raw.get_data(),
+                rtol=1e-7,
+                atol=1e-12,
+            ):
+                raise RuntimeError(
+                    "CND-to-MNE numerical round trip changed external-channel values"
+                )
+        channel_location_check = _check_channel_location_round_trip(
+            raw, round_trip, str(recording.neural.data_unit)
+        )
         for name, expected in zip(extracted.names, extracted.arrays, strict=True):
             observed = np.asarray(round_trip.stimulus.feature(name)[0]).squeeze()
             if not np.array_equal(observed, expected):
@@ -159,6 +201,8 @@ def convert_recipe(
             strict_report,
             round_trip_report,
             _content_sha256(round_trip),
+            external_raw,
+            channel_location_check,
         )
         _write_json_atomic(staging / "manifest.json", manifest, overwrite=False)
         _publish_staging(staging, resolved_destination, overwrite=overwrite)
@@ -190,28 +234,105 @@ def _device_name(raw: mne.io.BaseRaw, recipe: ConversionRecipe) -> str:
     return str(raw.info.get("device_info") or raw.info.get("description") or "unknown")
 
 
+def _attach_external_channels(
+    recording: Any,
+    external_raw: mne.io.BaseRaw,
+    *,
+    unit: str,
+    description: str,
+) -> Any:
+    neural = recording.neural
+    if neural is None:
+        raise RuntimeError("Cannot attach external channels without neural data")
+    if external_raw.n_times != np.asarray(neural.trials[0]).shape[0]:
+        raise ValueError("External channels do not align with the EEG sample count")
+    scales = {"v": 1.0, "mv": 1e-3, "uv": 1e-6, "nv": 1e-9}
+    normalized_unit = unit.strip().lower().replace("µ", "u").replace("μ", "u")
+    try:
+        scale = scales[normalized_unit]
+    except KeyError as error:
+        raise ValueError(f"Unsupported external EEG unit {unit!r}") from error
+    updated_neural = replace(
+        neural,
+        external_trials=(external_raw.get_data().T / scale,),
+        external_description=description,
+        external_fields={
+            "channelNames": np.asarray(external_raw.ch_names, dtype=object),
+            "channelTypes": np.asarray(external_raw.get_channel_types(), dtype=object),
+            "dataUnit": unit,
+        },
+        external_layout="single_struct",
+    )
+    updated_neural = replace(
+        updated_neural,
+        external_layout="struct_array",
+        external_group_names=(description,),
+        external_group_channel_counts=(len(external_raw.ch_names),),
+        external_group_fields=(dict(updated_neural.external_fields),),
+    )
+    return replace(recording, neural=updated_neural)
+
+
+def _raise_pipeline_validation_errors(report: Any, *, separate_clocks: bool) -> None:
+    errors = [
+        issue
+        for issue in report.errors
+        if not (separate_clocks and issue.code == "sampling_frequency_mismatch")
+    ]
+    if errors:
+        messages = "; ".join(f"{issue.path}: {issue.message}" for issue in errors)
+        raise ValueError(messages)
+
+
 def _extract_features(
     raw: mne.io.BaseRaw, recipe: ConversionRecipe, snapshot: SourceSnapshot
-) -> Any:
-    kinds = {feature.kind for feature in recipe.features}
-    if kinds == {"annotation_impulse"}:
-        return annotation_impulses(raw, recipe.features)
-    if kinds == {"bids_event_impulse"}:
-        relative_path = recipe.selection.get("events_path")
-        if not relative_path:
-            raise ValueError("BIDS event features require selection.events_path")
-        events_path = snapshot.root / str(relative_path)
-        if not events_path.is_file():
-            raise FileNotFoundError(events_path)
-        return bids_event_impulses(
-            raw,
-            events_path,
-            recipe.features,
-            sample_index_origin=int(
-                recipe.synchronization.get("sample_index_origin", 0)
-            ),
-        )
-    raise ValueError("A recipe must use one supported feature-adapter kind")
+) -> ExtractedFeatures:
+    target_sfreq = float(
+        recipe.synchronization.get("stimulus_sampling_rate_hz", raw.info["sfreq"])
+    )
+    names: list[str] = []
+    arrays: list[np.ndarray] = []
+    counts: dict[str, int] = {}
+    maximum_error = 0.0
+    for feature in recipe.features:
+        if feature.kind == "annotation_impulse":
+            extracted = annotation_impulses(raw, (feature,), target_sfreq=target_sfreq)
+        elif feature.kind == "bids_event_impulse":
+            relative_path = recipe.selection.get("events_path")
+            if not relative_path:
+                raise ValueError("BIDS event features require selection.events_path")
+            events_path = snapshot.root / str(relative_path)
+            if not events_path.is_file():
+                raise FileNotFoundError(events_path)
+            extracted = bids_event_impulses(
+                raw,
+                events_path,
+                (feature,),
+                sample_index_origin=int(
+                    recipe.synchronization.get("sample_index_origin", 0)
+                ),
+                target_sfreq=target_sfreq,
+            )
+        elif feature.kind == "audio_envelope":
+            extracted = audio_envelopes(
+                raw,
+                snapshot.root,
+                (feature,),
+                target_sfreq=target_sfreq,
+            )
+        else:
+            raise ValueError(f"Unsupported feature kind {feature.kind!r}")
+        names.extend(extracted.names)
+        arrays.extend(extracted.arrays)
+        counts.update(extracted.event_counts)
+        maximum_error = max(maximum_error, extracted.max_quantization_error_seconds)
+    return ExtractedFeatures(
+        names=tuple(names),
+        arrays=tuple(arrays),
+        event_counts=counts,
+        max_quantization_error_seconds=maximum_error,
+        sfreq=target_sfreq,
+    )
 
 
 def _manifest(
@@ -225,6 +346,8 @@ def _manifest(
     strict_report: Any,
     round_trip_report: Any,
     content_sha256: str,
+    external_raw: mne.io.BaseRaw | None,
+    channel_location_check: str,
 ) -> dict[str, Any]:
     duration = raw.n_times / float(raw.info["sfreq"])
     primary_record = next(
@@ -290,20 +413,40 @@ def _manifest(
                         if feature.source_values is not None
                         else None
                     ),
+                    "source": feature.source,
+                    "method": feature.method,
+                    "compression": feature.compression,
+                    "normalization": feature.normalization,
+                    "offset_seconds": feature.offset_seconds,
                 }
                 for feature in recipe.features
             ],
             "synchronization": dict(recipe.synchronization),
             "trial_policy": recipe.trials["unit"],
             "neural_unit": recipe.output.get("neural_unit", "V"),
+            "external_unit": recipe.output.get("external_unit"),
         },
         "contents": {
             "modality": "eeg",
             "subjects": 1,
             "trials": 1,
             "channels": len(raw.ch_names),
+            "external_channels": (
+                len(external_raw.ch_names) if external_raw is not None else 0
+            ),
+            "external_channel_names": (
+                list(external_raw.ch_names) if external_raw is not None else []
+            ),
+            "external_channel_types": (
+                external_raw.get_channel_types() if external_raw is not None else []
+            ),
             "samples": int(raw.n_times),
             "sampling_frequency_hz": float(raw.info["sfreq"]),
+            "stimulus_sampling_frequency_hz": float(
+                recipe.synchronization.get(
+                    "stimulus_sampling_rate_hz", raw.info["sfreq"]
+                )
+            ),
             "duration_seconds": duration,
             "features": [feature.name for feature in recipe.features],
             "event_counts": event_counts,
@@ -313,6 +456,10 @@ def _manifest(
         "validation": {
             "strict_cnd": "pass",
             "cnd_to_mne": "pass",
+            "external_channels_round_trip": (
+                "pass" if external_raw is not None else "not_applicable"
+            ),
+            "channel_locations_round_trip": channel_location_check,
             "source_reconciliation": "pass",
             "max_event_quantization_error_seconds": max_quantization_error_seconds,
             "strict_warnings": [asdict(issue) for issue in strict_report.warnings],
@@ -322,6 +469,35 @@ def _manifest(
         },
         "licenses": dict(recipe.license),
     }
+
+
+def _check_channel_location_round_trip(
+    source: mne.io.BaseRaw, recording: Any, neural_unit: str
+) -> str:
+    source_montage = source.get_montage()
+    if source_montage is None:
+        return "not_available"
+    restored = to_mne(
+        recording,
+        neural_unit=neural_unit,
+        montage="eeglab",
+        coordinate_scale_to_meters=1.0,
+    ).raws[0]
+    restored_montage = restored.get_montage()
+    if restored_montage is None:
+        raise RuntimeError("CND-to-MNE round trip lost channel locations")
+    source_positions = source_montage.get_positions()["ch_pos"]
+    restored_positions = restored_montage.get_positions()["ch_pos"]
+    for name in source.ch_names:
+        if name not in source_positions or name not in restored_positions:
+            raise RuntimeError(f"CND-to-MNE round trip lost channel location {name!r}")
+        if not np.allclose(
+            source_positions[name], restored_positions[name], rtol=0, atol=1e-12
+        ):
+            raise RuntimeError(
+                f"CND-to-MNE round trip changed channel location {name!r}"
+            )
+    return "pass"
 
 
 def _content_sha256(recording: Any) -> str:
@@ -334,6 +510,18 @@ def _content_sha256(recording: Any) -> str:
         "neural_sfreq": neural.sfreq,
         "neural_unit": neural.data_unit,
         "channel_names": neural.channel_names,
+        "external_description": neural.external_description,
+        "external_channel_names": (
+            np.atleast_1d(neural.external_fields.get("channelNames")).tolist()
+            if "channelNames" in neural.external_fields
+            else None
+        ),
+        "external_channel_types": (
+            np.atleast_1d(neural.external_fields.get("channelTypes")).tolist()
+            if "channelTypes" in neural.external_fields
+            else None
+        ),
+        "external_unit": neural.external_fields.get("dataUnit"),
         "stimulus_sfreq": stimulus.sfreq,
         "stimulus_names": stimulus.names,
         "stimulus_indices": stimulus.stimulus_indices,
@@ -342,6 +530,8 @@ def _content_sha256(recording: Any) -> str:
     }
     digest = sha256(json.dumps(metadata, sort_keys=True).encode("utf-8"))
     for trial in neural.trials:
+        _update_array_digest(digest, np.asarray(trial))
+    for trial in neural.external_trials or ():
         _update_array_digest(digest, np.asarray(trial))
     for feature in stimulus.features:
         for trial in feature:

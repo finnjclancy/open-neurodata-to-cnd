@@ -1,0 +1,22 @@
+    engine = 11.3.0
+    samples = 478208
+    channels = 30
+    feature_index = 1
+    feature_name = target_onset
+    event_samples = 40
+    fold_event_counts =
+
+       8
+       8
+       8
+       8
+       8
+
+    folds = 5
+    training_folds = 4
+    held_out_fold = 5
+    lambda = 0.1000
+    mean_test_r = 0.016406
+    finite_weights = 1
+    unchanged_upstream_functions = 1
+

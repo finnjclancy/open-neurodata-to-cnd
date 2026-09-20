@@ -6,7 +6,7 @@ import mne
 import pytest
 from conftest import synthetic_raw
 
-from neurodata_cnd.readers import _reader_from_suffix, read_raw
+from neurodata_cnd.readers import _reader_from_suffix, read_raw, split_eeg_and_external
 
 
 @pytest.mark.parametrize(
@@ -94,3 +94,30 @@ def test_eeg_only_channel_policy_excludes_auxiliary_channels(tmp_path: Path) -> 
 
     assert loaded.ch_names == ["Fz", "Cz"]
     assert loaded.get_channel_types() == ["eeg", "eeg"]
+
+
+def test_reviewed_auxiliary_channels_are_retained_separately(tmp_path: Path) -> None:
+    raw = synthetic_raw()
+    auxiliary = mne.io.RawArray(
+        [[0.0] * raw.n_times],
+        mne.create_info(["VEOG"], raw.info["sfreq"], ["eog"]),
+        verbose="ERROR",
+    )
+    raw.add_channels([auxiliary])
+    source = tmp_path / "mixed_raw.fif"
+    raw.save(source, overwrite=True, verbose="ERROR")
+
+    loaded = read_raw(
+        source,
+        {
+            "reader": "fif",
+            "channel_type_policy": "eeg_with_external",
+            "external_channel_types": ["eog"],
+        },
+    )
+    eeg, external = split_eeg_and_external(loaded)
+
+    assert eeg.ch_names == ["Fz", "Cz"]
+    assert external is not None
+    assert external.ch_names == ["VEOG"]
+    assert external.get_channel_types() == ["eog"]

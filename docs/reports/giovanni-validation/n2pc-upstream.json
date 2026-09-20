@@ -1,0 +1,1 @@
+{"engine":"11.3.0","samples":812032,"channels":30,"feature_index":1,"feature_name":"left_target_onset","event_samples":160,"fold_event_counts":[29,39,29,42,21],"folds":5,"training_folds":4,"held_out_fold":5,"lambda":0.1,"mean_test_r":0.016042879230655148,"finite_weights":true,"unchanged_upstream_functions":true}

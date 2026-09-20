@@ -1,0 +1,1 @@
+{"engine":"26.1.0.3346908 (R2026a) Update 5","upstream_preprocessing":true,"original_fs":1024,"analysis_fs":64,"samples":50752,"channels":30,"folds":5,"reference":"Avg","feature_index":1,"lambda":1,"mean_test_r":0.070836134515957563,"finite_weights":true}

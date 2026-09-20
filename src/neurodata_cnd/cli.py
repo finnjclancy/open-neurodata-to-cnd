@@ -37,6 +37,12 @@ def build_parser() -> argparse.ArgumentParser:
     retry.add_argument("--cache-root", type=Path, default=Path("cache"))
     retry.add_argument("--output-root", type=Path, default=Path("outputs"))
     retry.add_argument("--keep-source", action="store_true")
+    analysis = subparsers.add_parser(
+        "check-analysis", help="run a CND/TRF compatibility smoke check"
+    )
+    analysis.add_argument("neural_path", type=Path)
+    analysis.add_argument("stimulus_path", type=Path)
+    analysis.add_argument("--feature")
     return parser
 
 
@@ -117,6 +123,16 @@ def main(argv: Sequence[str] | None = None) -> int:
         from .corpus import corpus_status
 
         print(json.dumps(corpus_status(arguments.corpus_directory), indent=2))
+        return 0
+    if arguments.command == "check-analysis":
+        from .analysis_check import check_cnsp_trf_compatibility
+
+        result = check_cnsp_trf_compatibility(
+            arguments.neural_path,
+            arguments.stimulus_path,
+            feature=arguments.feature,
+        )
+        print(json.dumps(result.to_dict(), indent=2))
         return 0
     raise RuntimeError(f"Unhandled command {arguments.command!r}")
 

@@ -15,6 +15,7 @@ dependencies = [
   "mne>=1.8",
   "mne-bids>=0.17,<0.20",
   "numpy>=1.26",
+  "scipy>=1.12,<1.17",
 ]
 
 [project.optional-dependencies]

@@ -87,6 +87,7 @@
             "enum": [
               "annotation_impulse",
               "bids_event_impulse",
+              "audio_envelope",
               "continuous",
               "impulse"
             ]
@@ -101,6 +102,10 @@
             "items": {"type": "string", "minLength": 1}
           },
           "source": {"type": "string", "minLength": 1},
+          "method": {"enum": ["hilbert", "rectified"]},
+          "compression": {"type": "number", "exclusiveMinimum": 0},
+          "normalization": {"enum": ["none", "peak", "zscore"]},
+          "offset_seconds": {"type": "number", "minimum": 0},
           "unit": {"type": "string", "minLength": 1},
           "description": {"type": "string", "minLength": 1}
         },
@@ -118,6 +123,10 @@
                 {"required": ["source_values"]}
               ]
             }
+          },
+          {
+            "if": {"properties": {"kind": {"const": "audio_envelope"}}},
+            "then": {"required": ["source", "method"]}
           }
         ],
         "additionalProperties": true
@@ -131,6 +140,7 @@
         "format": {"const": "CND 1.0"},
         "mat_version": {"enum": ["5", "7.3"]},
         "neural_unit": {"type": "string", "minLength": 1},
+        "external_unit": {"type": "string", "minLength": 1},
         "strict_validation": {"const": true},
         "one_neural_file_per_subject": {"const": true},
         "shared_stimulus_file": {"const": true}

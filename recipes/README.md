@@ -8,6 +8,6 @@ Working examples:
 - [`ds004574-sub001-oddball.json`](ds004574-sub001-oddball.json) — one BIDS/EEGLAB oddball recording
 - [`nm000132-*.json`](nm000132-mmn.json) — ERP CORE corpus templates, one per paradigm; run them through a corpus plan rather than `convert`
 
-[`ds006434.example.json`](ds006434.example.json) is a draft for natural speech. It is not runnable until continuous envelopes exist.
+[`ds006434.example.json`](ds006434.example.json) is a draft for natural speech. The envelope adapter now exists, but the recipe is not runnable until the exact audio paths, source version, trial boundaries, units, and stimulus rights are reviewed.
 
 The `require_*` and fixed output flags describe checks the pipeline always performs. They are guarantees, not switches.
