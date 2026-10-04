@@ -35,3 +35,10 @@ cache/
 __pycache__/
 *.pyc
 .DS_Store
+
+# Generated job plans and build output.
+plans/
+build/
+dist/
+*.egg-info/
+.coverage

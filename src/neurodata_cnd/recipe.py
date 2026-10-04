@@ -86,8 +86,6 @@ def load_recipe(path: str | Path) -> ConversionRecipe:
 
     source_payload = _mapping(payload, "source")
     version = _text(source_payload, "version")
-    if source_payload.get("require_pinned_version_before_conversion") and not version:
-        raise RecipeError("source.version must be pinned before conversion")
     source_files = _source_files(source_payload)
     primary_path = str(
         source_payload.get("primary_path") or source_files[0].path
@@ -95,117 +93,7 @@ def load_recipe(path: str | Path) -> ConversionRecipe:
     if primary_path not in {source_file.path for source_file in source_files}:
         raise RecipeError("source.primary_path must identify one declared source file")
 
-    feature_specs: list[FeatureSpec] = []
-    raw_features = payload.get("features")
-    if not isinstance(raw_features, list) or not raw_features:
-        raise RecipeError("features must be a non-empty list")
-    for index, feature in enumerate(raw_features):
-        if not isinstance(feature, dict):
-            raise RecipeError(f"features[{index}] must be an object")
-        kind = _text(feature, "kind")
-        if kind not in {
-            "annotation_impulse",
-            "bids_event_impulse",
-            "audio_envelope",
-        }:
-            raise RecipeError(
-                f"features[{index}].kind={kind!r} is not implemented; "
-                "supported: annotation_impulse, bids_event_impulse, audio_envelope"
-            )
-        source_annotation = _optional_text(feature, "source_annotation")
-        source_column = _optional_text(feature, "source_column")
-        source_value = _optional_text(feature, "source_value")
-        source = _optional_text(feature, "source")
-        raw_source_values = feature.get("source_values")
-        source_values: tuple[str, ...] | None = None
-        if raw_source_values is not None:
-            if (
-                not isinstance(raw_source_values, list)
-                or not raw_source_values
-                or any(
-                    not isinstance(value, str) or not value.strip()
-                    for value in raw_source_values
-                )
-            ):
-                raise RecipeError(
-                    f"features[{index}].source_values must be a non-empty string list"
-                )
-            source_values = tuple(value.strip() for value in raw_source_values)
-            if len(set(source_values)) != len(source_values):
-                raise RecipeError(
-                    f"features[{index}].source_values must not contain duplicates"
-                )
-        if source_value is not None and source_values is not None:
-            raise RecipeError(
-                f"features[{index}] must use source_value or source_values, not both"
-            )
-        if kind == "annotation_impulse" and source_annotation is None:
-            raise RecipeError(
-                f"features[{index}] annotation impulses require source_annotation"
-            )
-        if kind == "bids_event_impulse" and (
-            source_column is None or (source_value is None and source_values is None)
-        ):
-            raise RecipeError(
-                f"features[{index}] BIDS impulses require source_column and "
-                "source_value or source_values"
-            )
-        method = _optional_text(feature, "method")
-        normalization = str(feature.get("normalization", "none")).strip().lower()
-        compression = float(feature.get("compression", 1.0))
-        offset_seconds = float(feature.get("offset_seconds", 0.0))
-        if kind == "audio_envelope":
-            if source is None:
-                raise RecipeError(
-                    f"features[{index}] audio envelopes require a source path"
-                )
-            if method not in {"hilbert", "rectified"}:
-                raise RecipeError(
-                    f"features[{index}].method must be 'hilbert' or 'rectified'"
-                )
-            if compression <= 0:
-                raise RecipeError(f"features[{index}].compression must be positive")
-            if normalization not in {"none", "peak", "zscore"}:
-                raise RecipeError(
-                    f"features[{index}].normalization must be none, peak, or zscore"
-                )
-            if offset_seconds < 0:
-                raise RecipeError(
-                    f"features[{index}].offset_seconds must not be negative"
-                )
-        feature_specs.append(
-            FeatureSpec(
-                name=_text(feature, "name"),
-                kind=kind,
-                unit=_text(feature, "unit"),
-                source_annotation=source_annotation,
-                source_column=source_column,
-                source_value=source_value,
-                source_values=source_values,
-                source=source,
-                method=method,
-                compression=compression,
-                normalization=normalization,
-                offset_seconds=offset_seconds,
-                description=_optional_text(feature, "description"),
-            )
-        )
-    names = [feature.name for feature in feature_specs]
-    if len(set(names)) != len(names):
-        raise RecipeError("Feature names must be unique")
-    selectors = [
-        (
-            feature.kind,
-            feature.source_annotation,
-            feature.source_column,
-            feature.source_value,
-            feature.source_values,
-            feature.source,
-        )
-        for feature in feature_specs
-    ]
-    if len(set(selectors)) != len(selectors):
-        raise RecipeError("Source event selectors must map to only one feature")
+    feature_specs = _features(payload)
 
     selection = _mapping(payload, "selection")
     if _text(selection, "modality").lower() != "eeg":
@@ -349,3 +237,120 @@ def _source_files(source: dict[str, Any]) -> tuple[SourceFileSpec, ...]:
     if len(set(paths)) != len(paths):
         raise RecipeError("source file paths must be unique")
     return tuple(files)
+
+
+def _features(payload: dict[str, Any]) -> tuple[FeatureSpec, ...]:
+    raw_features = payload.get("features")
+    if not isinstance(raw_features, list) or not raw_features:
+        raise RecipeError("features must be a non-empty list")
+    feature_specs = [
+        _feature(feature, index) for index, feature in enumerate(raw_features)
+    ]
+    names = [feature.name for feature in feature_specs]
+    if len(set(names)) != len(names):
+        raise RecipeError("Feature names must be unique")
+    selectors = [
+        (
+            feature.kind,
+            feature.source_annotation,
+            feature.source_column,
+            feature.source_value,
+            feature.source_values,
+            feature.source,
+        )
+        for feature in feature_specs
+    ]
+    if len(set(selectors)) != len(selectors):
+        raise RecipeError("Source event selectors must map to only one feature")
+
+    return tuple(feature_specs)
+
+
+def _feature(feature: object, index: int) -> FeatureSpec:
+    """Parse one event or audio feature and its adapter options."""
+    if not isinstance(feature, dict):
+        raise RecipeError(f"features[{index}] must be an object")
+    kind = _text(feature, "kind")
+    if kind not in {"annotation_impulse", "bids_event_impulse", "audio_envelope"}:
+        raise RecipeError(
+            f"features[{index}].kind={kind!r} is not implemented; "
+            "supported: annotation_impulse, bids_event_impulse, audio_envelope"
+        )
+    source_annotation = _optional_text(feature, "source_annotation")
+    source_column = _optional_text(feature, "source_column")
+    source_value = _optional_text(feature, "source_value")
+    source = _optional_text(feature, "source")
+    raw_source_values = feature.get("source_values")
+    source_values: tuple[str, ...] | None = None
+    if raw_source_values is not None:
+        if (
+            not isinstance(raw_source_values, list)
+            or not raw_source_values
+            or any(
+                not isinstance(value, str) or not value.strip()
+                for value in raw_source_values
+            )
+        ):
+            raise RecipeError(
+                f"features[{index}].source_values must be a non-empty string list"
+            )
+        source_values = tuple(value.strip() for value in raw_source_values)
+        if len(set(source_values)) != len(source_values):
+            raise RecipeError(
+                f"features[{index}].source_values must not contain duplicates"
+            )
+    if source_value is not None and source_values is not None:
+        raise RecipeError(
+            f"features[{index}] must use source_value or source_values, not both"
+        )
+    if kind == "annotation_impulse" and source_annotation is None:
+        raise RecipeError(
+            f"features[{index}] annotation impulses require source_annotation"
+        )
+    if kind == "bids_event_impulse" and (
+        source_column is None or (source_value is None and source_values is None)
+    ):
+        raise RecipeError(
+            f"features[{index}] BIDS impulses require source_column and "
+            "source_value or source_values"
+        )
+    method = _optional_text(feature, "method")
+    normalization = str(feature.get("normalization", "none")).strip().lower()
+    compression = float(feature.get("compression", 1.0))
+    offset_seconds = float(feature.get("offset_seconds", 0.0))
+    if kind == "audio_envelope":
+        if source is None:
+            raise RecipeError(
+                f"features[{index}] audio envelopes require a source path"
+            )
+        if method not in {"hilbert", "rectified"}:
+            raise RecipeError(
+                f"features[{index}].method must be 'hilbert' or 'rectified'"
+            )
+        if compression <= 0:
+            raise RecipeError(f"features[{index}].compression must be positive")
+        if normalization not in {"none", "peak", "zscore"}:
+            raise RecipeError(
+                f"features[{index}].normalization must be none, peak, or zscore"
+            )
+        if offset_seconds < 0:
+            raise RecipeError(f"features[{index}].offset_seconds must not be negative")
+    return FeatureSpec(
+        name=_text(feature, "name"),
+        kind=kind,
+        unit=_text(feature, "unit"),
+        source_annotation=source_annotation,
+        source_column=source_column,
+        source_value=source_value,
+        source_values=source_values,
+        source=source,
+        method=method,
+        compression=compression,
+        normalization=normalization,
+        offset_seconds=offset_seconds,
+        description=_optional_text(feature, "description"),
+    )
+
+
+class CorpusPlanError(ValueError):
+    """A corpus recipe or remote inventory is incomplete or inconsistent."""

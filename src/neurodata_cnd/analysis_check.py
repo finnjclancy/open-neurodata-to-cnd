@@ -60,15 +60,10 @@ def check_cnsp_trf_compatibility(
     stimulus = recording.stimulus
     if neural is None or stimulus is None:
         raise ValueError("TRF compatibility requires neural and stimulus data")
-    separate_clocks = not np.isclose(stimulus.sfreq, neural.sfreq, rtol=0, atol=0)
-    errors = [
-        issue
-        for issue in report.errors
-        if not (separate_clocks and issue.code == "sampling_frequency_mismatch")
-    ]
-    if errors:
-        messages = "; ".join(f"{issue.path}: {issue.message}" for issue in errors)
-        raise ValueError(messages)
+    if report.errors:
+        raise ValueError(
+            "; ".join(f"{issue.path}: {issue.message}" for issue in report.errors)
+        )
     if not neural.trials or not stimulus.features:
         raise ValueError("TRF compatibility requires at least one trial and feature")
     feature_name = feature or stimulus.names[0]

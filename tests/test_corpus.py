@@ -7,8 +7,9 @@ from pathlib import Path
 from types import SimpleNamespace
 
 from conftest import synthetic_raw, write_test_recipe
+from jsonschema import Draft202012Validator
 
-from neurodata_cnd import corpus
+from neurodata_cnd import corpus, planning
 
 
 def _job(recording_id: str, channels: int, duration: float, group: str) -> dict:
@@ -46,7 +47,7 @@ def test_pilot_selection_covers_channel_layouts_groups_and_extremes() -> None:
         _job("sub-005", 63, 14.0, "PD"),
     ]
 
-    selected = corpus._select_pilot(jobs, count=5)
+    selected = planning._select_pilot(jobs, count=5)
 
     assert set(selected) == {job["recording_id"] for job in jobs}
 
@@ -140,8 +141,11 @@ def test_plan_corpus_builds_a_pinned_recording_plan(
             return metadata
         return inventory
 
-    monkeypatch.setattr(corpus, "_fetch", fake_fetch)
+    monkeypatch.setattr(planning, "_fetch", fake_fetch)
     plan = corpus.plan_corpus(corpus_recipe, tmp_path / "plan.json")
+
+    schema_path = Path(__file__).resolve().parents[1] / "schemas/plan.schema.json"
+    Draft202012Validator(json.loads(schema_path.read_text())).validate(plan)
 
     assert plan["recording_count"] == 1
     assert plan["jobs"][0]["recording_id"] == "sub-001"

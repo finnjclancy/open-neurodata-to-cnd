@@ -1,13 +1,30 @@
 # Recipes
 
-A recipe is the conversion decisions for one dataset. Someone should be able to tell what a CND trial is, which channels were kept, and how events were mapped without reading the Python.
+A recipe states what a trial means, which channels to retain, and how stimulus
+tracks align with EEG. Read an example before editing the schema.
 
-Working examples:
+| Example | Input / use |
+| --- | --- |
+| [eegmmidb-s001-r03.json](eegmmidb-s001-r03.json) | One PhysioNet EDF recording |
+| [ds004574-sub001-oddball.json](ds004574-sub001-oddball.json) | One BIDS recording (files plus metadata) |
+| [nm000132-p3.json](nm000132-p3.json) | ERP CORE batch template; use a corpus plan |
+| [ds006434.example.json](ds006434.example.json) | Draft speech recipe; not executable |
 
-- [`eegmmidb-s001-r03.json`](eegmmidb-s001-r03.json) — one PhysioNet EDF+ file
-- [`ds004574-sub001-oddball.json`](ds004574-sub001-oddball.json) — one BIDS/EEGLAB oddball recording
-- [`nm000132-*.json`](nm000132-mmn.json) — ERP CORE corpus templates, one per paradigm; run them through a corpus plan rather than `convert`
+Sources need a version and checksums. Supported readers: EDF, BDF, BrainVision,
+FIF, EEGLAB, GDF, and BIDS. Current recipes support EEG and one full run per trial.
 
-[`ds006434.example.json`](ds006434.example.json) is a draft for natural speech. The envelope adapter now exists, but the recipe is not runnable until the exact audio paths, source version, trial boundaries, units, and stimulus rights are reviewed.
+- `annotation_impulse`: match an annotation label.
+- `bids_event_impulse`: match `source_column` with `source_value` or `source_values`.
+- `audio_envelope`: read WAV; choose `hilbert` or `rectified`, positive compression,
+  and `none`, `peak`, or `zscore` normalization.
 
-The `require_*` and fixed output flags describe checks the pipeline always performs. They are guarantees, not switches.
+`sample_index_origin` defaults to 0; ERP CORE uses 1. An impulse marks an event
+at one sample. Two selected events landing on the same sample are rejected.
+
+`stimulus_sampling_rate_hz` may differ from EEG; both start at sample zero.
+Audio `offset_seconds` trims the audio start before alignment. It cannot place
+sound at an arbitrary EEG onset. Review source timing before activating a recipe.
+
+`eeg_with_external` retains reviewed auxiliary channel types in CND `extChan`.
+The `require_*` flags and fixed output flags record guarantees, not switches.
+Validate edits with `uv run python scripts/validate_catalog.py`.

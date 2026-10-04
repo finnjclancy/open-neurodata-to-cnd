@@ -65,11 +65,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             source_override=arguments.source,
             overwrite=arguments.overwrite,
         )
-        payload = asdict(conversion_result)
-        for key, value in tuple(payload.items()):
-            if isinstance(value, Path):
-                payload[key] = str(value)
-        print(json.dumps(payload, indent=2))
+        print(json.dumps(asdict(conversion_result), indent=2, default=str))
         return 0
     if arguments.command == "plan":
         from .corpus import plan_corpus
@@ -95,15 +91,8 @@ def main(argv: Sequence[str] | None = None) -> int:
                 "Batch conversion requires the companion CND-MNE package. "
                 "Install this project with its 'conversion' extra."
             )
-        try:
-            from .corpus import run_batch
-        except ModuleNotFoundError as error:
-            if error.name == "cnd_mne":
-                raise SystemExit(
-                    "Batch conversion requires the companion CND-MNE package. "
-                    "Install this project with its 'conversion' extra."
-                ) from error
-            raise
+        from .corpus import run_batch
+
         batch_result = run_batch(
             arguments.plan,
             cache_root=arguments.cache_root,
